@@ -1,7 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanDeviceWidget extends StatelessWidget {
-  const ScanDeviceWidget({super.key});
+  final ScanResult result;
+  final VoidCallback? onTap;
+
+  const ScanDeviceWidget({super.key, required this.result, this.onTap});
+
+  List<Widget> _buildTitle() {
+    const TextStyle titleStyle = TextStyle(
+      fontWeight: FontWeight.w500,
+    );
+    const TextStyle deviceStyle = TextStyle(
+      fontSize: 14,
+      color: Colors.grey,
+    );
+
+    return result.device.platformName.isNotEmpty
+        ? [
+            Text(
+              result.device.platformName,
+              style: titleStyle,
+            ),
+            Text(
+              result.device.remoteId.str,
+              style: deviceStyle,
+            ),
+          ]
+        : [
+            Text(
+              result.device.remoteId.str,
+              style: titleStyle,
+            ),
+          ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,23 +42,20 @@ class ScanDeviceWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Device Name'),
-          const Text(
-            'Address',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
+          ..._buildTitle(),
           const SizedBox(
             height: 8,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('-89'),
+              Text(result.rssi.toString()),
               FilledButton(
-                onPressed: () {},
+                onPressed: result.advertisementData.connectable
+                    ? () {
+                        print('connect!');
+                      }
+                    : null,
                 child: const Text('Connect'),
               ),
             ],
