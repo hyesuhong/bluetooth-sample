@@ -15,8 +15,10 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   List<ScanResult> _scanResults = [];
+  bool _isScanning = false;
 
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+  late StreamSubscription<bool> _isScanningSubscription;
 
   @override
   void initState() {
@@ -30,11 +32,23 @@ class _ScanScreenState extends State<ScanScreen> {
     }, onError: (error) {
       print(error);
     });
+
+    FlutterBluePlus.cancelWhenScanComplete(_scanResultsSubscription);
+
+    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+      _isScanning = state;
+      if (mounted) {
+        setState(() {});
+      }
+    }, onError: (error) {
+      print(error);
+    });
   }
 
   @override
   void dispose() {
     _scanResultsSubscription.cancel();
+    _isScanningSubscription.cancel();
 
     super.dispose();
   }
@@ -49,6 +63,26 @@ class _ScanScreenState extends State<ScanScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Future onStopPressed() async {
+    try {
+      await FlutterBluePlus.stopScan();
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Widget _buildFloatingButton() {
+    return FlutterBluePlus.isScanningNow
+        ? FloatingActionButton(
+            onPressed: onStopPressed,
+            child: const Icon(Icons.stop),
+          )
+        : FloatingActionButton(
+            onPressed: onScanPressed,
+            child: const Icon(Icons.search),
+          );
   }
 
   @override
@@ -70,10 +104,7 @@ class _ScanScreenState extends State<ScanScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: onScanPressed,
-        child: const Icon(Icons.search),
-      ),
+      floatingActionButton: _buildFloatingButton(),
     );
   }
 }
