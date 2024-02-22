@@ -15,6 +15,7 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   List<ScanResult> _scanResults = [];
+
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
 
   @override
@@ -23,9 +24,6 @@ class _ScanScreenState extends State<ScanScreen> {
 
     _scanResultsSubscription = FlutterBluePlus.onScanResults.listen((results) {
       _scanResults = results;
-      if (results.isNotEmpty) {
-        print(results.last);
-      }
       if (mounted) {
         setState(() {});
       }
@@ -60,10 +58,17 @@ class _ScanScreenState extends State<ScanScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Find Devices'),
       ),
-      body: ListView(
-        children: [
-          for (var result in _scanResults) ScanDeviceWidget(result: result),
-        ],
+      body: ListView.separated(
+        itemCount: _scanResults.length,
+        separatorBuilder: (context, index) {
+          return const Divider();
+        },
+        itemBuilder: (BuildContext context, int index) {
+          final res = _scanResults[index];
+          return ScanDeviceWidget(
+            result: res,
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: onScanPressed,
