@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bluetooth_sample/screens/device_screen.dart';
 import 'package:bluetooth_sample/widgets/scan_device_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -85,6 +86,14 @@ class _ScanScreenState extends State<ScanScreen> {
           );
   }
 
+  void onConnectPressed(BluetoothDevice device) {
+    MaterialPageRoute route = MaterialPageRoute(
+      builder: (context) => DeviceScreen(device: device),
+      settings: const RouteSettings(name: '/DeviceScreen'),
+    );
+    Navigator.of(context).push(route);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +110,7 @@ class _ScanScreenState extends State<ScanScreen> {
           final res = _scanResults[index];
           return ScanDeviceWidget(
             result: res,
+            onTap: () => onConnectPressed(res.device),
           );
         },
       ),
