@@ -1,4 +1,7 @@
+import 'package:bluetooth_sample/widgets/scan_device_widget.dart';
 import 'package:flutter/material.dart';
+
+final List<int> dummyList = List.filled(10, 0);
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
@@ -8,9 +11,13 @@ class ScanScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Find devices'),
+        title: const Text('Find Devices'),
       ),
-      body: ListView(),
+      body: ListView(
+        children: [
+          for (var dummy in dummyList) ScanDeviceWidget(),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           print('floating');
