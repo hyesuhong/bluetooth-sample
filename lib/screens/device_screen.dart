@@ -133,6 +133,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
                   _buildGetServicesButton(),
                 ],
               ),
+              SizedBox(
+                height: 24,
+              ),
               ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
