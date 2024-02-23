@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -28,10 +28,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
     _connectionStateSubscription =
         widget.device.connectionState.listen((state) async {
-      print('device is $state');
       _connectionState = state;
       if (state == BluetoothConnectionState.connected) {
-        _services = []; // must rediscover services
+        _services = [];
       }
       if (state == BluetoothConnectionState.connected && _rssi == null) {
         _rssi = await widget.device.readRssi();
@@ -57,6 +56,19 @@ class _DeviceScreenState extends State<DeviceScreen> {
     await widget.device.disconnect();
   }
 
+  Future _onGetServicesPressed() async {
+    if (_connectionState == BluetoothConnectionState.connected) {
+      List<BluetoothService> services = await widget.device.discoverServices();
+      _services = services;
+
+      print(services);
+
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
   Widget _buildActionButton() {
     return _connectionState == BluetoothConnectionState.connected
         ? TextButton(
@@ -71,8 +83,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   Widget _buildGetServicesButton() {
     return TextButton(
-      onPressed:
-          _connectionState == BluetoothConnectionState.connected ? () {} : null,
+      onPressed: _connectionState == BluetoothConnectionState.connected
+          ? _onGetServicesPressed
+          : null,
       child: const Text('Get Services'),
     );
   }
@@ -119,6 +132,18 @@ class _DeviceScreenState extends State<DeviceScreen> {
                   ),
                   _buildGetServicesButton(),
                 ],
+              ),
+              ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  BluetoothService service = _services[index];
+                  return ServiceWidget(service: service);
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+                itemCount: _services.length,
               ),
             ],
           ),
