@@ -28,6 +28,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
     _connectionStateSubscription =
         widget.device.connectionState.listen((state) async {
+      print('device is $state');
       _connectionState = state;
       if (state == BluetoothConnectionState.connected) {
         _services = []; // must rediscover services
@@ -48,6 +49,34 @@ class _DeviceScreenState extends State<DeviceScreen> {
     super.dispose();
   }
 
+  Future _onConnectPressed() async {
+    await widget.device.connect();
+  }
+
+  Future _onDisconnectPressed() async {
+    await widget.device.disconnect();
+  }
+
+  Widget _buildActionButton() {
+    return _connectionState == BluetoothConnectionState.connected
+        ? TextButton(
+            onPressed: _onDisconnectPressed,
+            child: const Text('Disconnect'),
+          )
+        : TextButton(
+            onPressed: _onConnectPressed,
+            child: const Text('Connect'),
+          );
+  }
+
+  Widget _buildGetServicesButton() {
+    return TextButton(
+      onPressed:
+          _connectionState == BluetoothConnectionState.connected ? () {} : null,
+      child: const Text('Get Services'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,14 +84,45 @@ class _DeviceScreenState extends State<DeviceScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.device.platformName),
         actions: [
-          TextButton(
-            onPressed: () {},
-            child: const Text('Disconnect'),
-          ),
+          _buildActionButton(),
         ],
       ),
-      body: Center(
-        child: Text(widget.device.toString()),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Text(widget.device.remoteId.str),
+              Row(
+                children: [
+                  Container(
+                    width: 64,
+                    alignment: Alignment.center,
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.bluetooth,
+                          color: Colors.grey,
+                        ),
+                        if (_rssi != null)
+                          Text(
+                            '${_rssi.toString()}dBm',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Text('Device is ${_connectionState.name}.'),
+                  ),
+                  _buildGetServicesButton(),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
