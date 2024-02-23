@@ -113,8 +113,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     alignment: Alignment.center,
                     child: Column(
                       children: [
-                        const Icon(
-                          Icons.bluetooth,
+                        Icon(
+                          _connectionState == BluetoothConnectionState.connected
+                              ? Icons.bluetooth_connected
+                              : Icons.bluetooth,
                           color: Colors.grey,
                         ),
                         if (_rssi != null)
