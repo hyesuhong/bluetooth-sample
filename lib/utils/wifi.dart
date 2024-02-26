@@ -68,6 +68,25 @@ class Wifi {
         }
       }
       print('Android location status: $status');
+    } else if (Platform.isIOS) {
+      status = await Permission.location.status;
+
+      if (status.isPermanentlyDenied) {
+        print(
+            'permission is permanently denied. If you want to use this function, go setting');
+      } else if (status.isDenied ||
+          status.isRestricted ||
+          status.isProvisional) {
+        PermissionStatus requestStatus = await Permission.location.request();
+
+        if (requestStatus.isGranted || requestStatus.isLimited) {
+          status = requestStatus;
+        } else {
+          print('permission is not granted');
+        }
+      }
+
+      print('Ios location status: $status');
     }
 
     return status;
