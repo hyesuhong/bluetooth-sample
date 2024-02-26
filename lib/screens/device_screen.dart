@@ -61,8 +61,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
       List<BluetoothService> services = await widget.device.discoverServices();
       _services = services;
 
-      print(services);
-
       if (mounted) {
         setState(() {});
       }
@@ -135,7 +133,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                   _buildGetServicesButton(),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 24,
               ),
               ListView.separated(
@@ -143,7 +141,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   BluetoothService service = _services[index];
-                  return ServiceWidget(service: service);
+                  return ServiceWidget(device: widget.device, service: service);
                 },
                 separatorBuilder: (context, index) {
                   return const Divider();

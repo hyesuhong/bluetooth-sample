@@ -5,8 +5,6 @@ import 'package:bluetooth_sample/widgets/scan_device_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-final List<int> dummyList = List.filled(10, 0);
-
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
 

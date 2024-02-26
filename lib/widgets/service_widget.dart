@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ServiceWidget extends StatelessWidget {
+  final BluetoothDevice device;
   final BluetoothService service;
-  const ServiceWidget({super.key, required this.service});
+
+  const ServiceWidget({super.key, required this.device, required this.service});
 
   Widget _buildCharacteristicsList(
       List<BluetoothCharacteristic> characteristics) {
@@ -17,7 +19,10 @@ class ServiceWidget extends StatelessWidget {
         itemBuilder: (context, index) {
           BluetoothCharacteristic characteristic =
               service.characteristics[index];
-          return CharacteristicWidget(characteristic: characteristic);
+          return CharacteristicWidget(
+            device: device,
+            characteristic: characteristic,
+          );
         },
       ),
     );

@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class CharacteristicWidget extends StatefulWidget {
+  final BluetoothDevice device;
   final BluetoothCharacteristic characteristic;
 
-  const CharacteristicWidget({super.key, required this.characteristic});
+  const CharacteristicWidget(
+      {super.key, required this.device, required this.characteristic});
 
   @override
   State<StatefulWidget> createState() {
@@ -31,6 +33,8 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
         setState(() {});
       }
     });
+
+    widget.device.cancelWhenDisconnected(_lastValueSubscription);
   }
 
   @override
@@ -50,11 +54,34 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     var bandUserInfo = _getPersonalInfo();
 
     try {
-      await widget.characteristic.write(bandUserInfo, withoutResponse: false);
-      print(_value);
+      await widget.characteristic.write(bandUserInfo);
     } catch (error) {
       print(error);
     }
+  }
+
+  Future _onSubscribePressed() async {
+    await widget.characteristic.setNotifyValue(true);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future _onUnsubscribePressed() async {
+    await widget.characteristic.setNotifyValue(false);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Widget _buildSubscribeButton() {
+    bool isNotifying = widget.characteristic.isNotifying;
+    return TextButton(
+      onPressed: isNotifying ? _onUnsubscribePressed : _onSubscribePressed,
+      child: Text(isNotifying ? 'Unsubscribe' : 'Subscribe'),
+    );
   }
 
   @override
@@ -78,6 +105,9 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                   onPressed: _onWritePressed,
                   child: const Text('Write'),
                 ),
+              if (widget.characteristic.properties.notify ||
+                  widget.characteristic.properties.indicate)
+                _buildSubscribeButton(),
             ],
           ),
           Text(_value.toString()),
