@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CharacteristicWidget extends StatefulWidget {
   final BluetoothCharacteristic characteristic;
@@ -44,6 +48,8 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Future _onWritePressed() async {
+    await Wifi.getWifiInformation();
+
     var bandUserInfo = _getPersonalInfo();
 
     try {
