@@ -44,7 +44,14 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Future _onWritePressed() async {
-    print('write');
+    var bandUserInfo = _getPersonalInfo();
+
+    try {
+      await widget.characteristic.write(bandUserInfo, withoutResponse: false);
+      print(_value);
+    } catch (error) {
+      print(error);
+    }
   }
 
   @override
@@ -75,4 +82,24 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
       ),
     );
   }
+}
+
+// LNB1: Get User Personal Information
+const CMD_GET_USERINFO = 0x42;
+List<int> _getPersonalInfo() {
+  List<int> value = List.filled(16, 0);
+  value[0] = CMD_GET_USERINFO;
+  var crc = _crcValue(value);
+  value[value.length - 1] = crc;
+
+  return value;
+}
+
+int _crcValue(List<int> value) {
+  int crc = 0;
+  for (var i = 0; i < value.length - 1; i++) {
+    crc += value[i];
+  }
+
+  return crc & 0xff;
 }
