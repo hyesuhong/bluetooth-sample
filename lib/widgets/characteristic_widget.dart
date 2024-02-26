@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 
 class CharacteristicWidget extends StatefulWidget {
   final BluetoothCharacteristic characteristic;
@@ -44,7 +45,21 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Future _onWritePressed() async {
-    print('write');
+    NetworkInfo info = NetworkInfo();
+    String? wifiName = await info.getWifiName();
+    String? wifiBSSID = await info.getWifiBSSID();
+
+    print(wifiName);
+    print(wifiBSSID);
+
+    // try {
+    //   await widget.characteristic.write(
+    //     [0x12, 0x34],
+    //     withoutResponse: false,
+    //   );
+    // } catch (error) {
+    //   print(error);
+    // }
   }
 
   @override

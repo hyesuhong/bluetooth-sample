@@ -2,20 +2,26 @@ PODS:
   - Flutter (1.0.0)
   - flutter_blue_plus (0.0.1):
     - Flutter
+  - network_info_plus (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_blue_plus (from `.symlinks/plugins/flutter_blue_plus/ios`)
+  - network_info_plus (from `.symlinks/plugins/network_info_plus/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   flutter_blue_plus:
     :path: ".symlinks/plugins/flutter_blue_plus/ios"
+  network_info_plus:
+    :path: ".symlinks/plugins/network_info_plus/ios"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_blue_plus: 4837da7d00cf5d441fdd6635b3a57f936778ea96
+  network_info_plus: 6d0c3eb8367b8164fa3fb0c19875e3f59d49697f
 
 PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
 
