@@ -66,6 +66,30 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     // }
   }
 
+  Future _onSubscribePressed() async {
+    await widget.characteristic.setNotifyValue(true);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future _onUnsubscribePressed() async {
+    await widget.characteristic.setNotifyValue(false);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Widget _buildSubscribeButton() {
+    bool isNotifying = widget.characteristic.isNotifying;
+    return TextButton(
+      onPressed: isNotifying ? _onUnsubscribePressed : _onSubscribePressed,
+      child: Text(isNotifying ? 'Unsubscribe' : 'Subscribe'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -87,6 +111,9 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                   onPressed: _onWritePressed,
                   child: const Text('Write'),
                 ),
+              if (widget.characteristic.properties.notify ||
+                  widget.characteristic.properties.indicate)
+                _buildSubscribeButton(),
             ],
           ),
           Text(_value.toString()),
