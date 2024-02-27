@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bluetooth_sample/utils/wifi.dart';
+import 'package:bluetooth_sample/widgets/password_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -45,7 +46,16 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Future _onWritePressed() async {
-    await Wifi.getCurrentWifiInformation();
+    String ssid = await Wifi.getCurrentWifiSSID();
+    print(ssid);
+
+    showDialog(
+        context: context,
+        builder: (context) => PasswordDialog(
+              ssid: ssid,
+              characteristic: widget.characteristic,
+            ));
+
     // var bandUserInfo = _getPersonalInfo();
     //
     // try {
