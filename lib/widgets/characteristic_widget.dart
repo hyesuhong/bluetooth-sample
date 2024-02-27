@@ -28,6 +28,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     _lastValueSubscription =
         widget.characteristic.lastValueStream.listen((value) {
       _value = value;
+      print('uuid: ${widget.characteristic.uuid}, value: $value');
       if (mounted) {
         setState(() {});
       }
@@ -45,25 +46,39 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     await widget.characteristic.read();
   }
 
-  Future _onWritePressed() async {
+  Future _onWriteUserInfoPressed() async {
+    var bandUserInfo = _getPersonalInfo();
+
+    try {
+      await widget.characteristic.write(bandUserInfo, withoutResponse: false);
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future _onWriteWifiPressed() async {
     String ssid = await Wifi.getCurrentWifiSSID();
-    print(ssid);
 
     showDialog(
-        context: context,
-        builder: (context) => PasswordDialog(
-              ssid: ssid,
-              characteristic: widget.characteristic,
-            ));
+      context: context,
+      builder: (context) => PasswordDialog(
+        ssid: ssid,
+        characteristic: widget.characteristic,
+      ),
+    );
+  }
 
-    // var bandUserInfo = _getPersonalInfo();
-    //
-    // try {
-    //   await widget.characteristic.write(bandUserInfo, withoutResponse: false);
-    //   print(_value);
-    // } catch (error) {
-    //   print(error);
-    // }
+  List<Widget> _buildWriteButtons() {
+    return [
+      TextButton(
+        onPressed: _onWriteUserInfoPressed,
+        child: const Text('Write getting user info'),
+      ),
+      TextButton(
+        onPressed: _onWriteWifiPressed,
+        child: const Text('Write wifi'),
+      ),
+    ];
   }
 
   Future _onSubscribePressed() async {
@@ -107,10 +122,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                   child: const Text('Read'),
                 ),
               if (widget.characteristic.properties.write)
-                TextButton(
-                  onPressed: _onWritePressed,
-                  child: const Text('Write'),
-                ),
+                ..._buildWriteButtons(),
               if (widget.characteristic.properties.notify ||
                   widget.characteristic.properties.indicate)
                 _buildSubscribeButton(),
