@@ -59,6 +59,11 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   Future _onWriteWifiPressed() async {
     String ssid = await Wifi.getCurrentWifiSSID();
 
+    if (ssid.isEmpty) {
+      print('Cannot get ssid');
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => PasswordDialog(
