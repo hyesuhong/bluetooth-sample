@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -44,14 +45,15 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Future _onWritePressed() async {
-    var bandUserInfo = _getPersonalInfo();
-
-    try {
-      await widget.characteristic.write(bandUserInfo, withoutResponse: false);
-      print(_value);
-    } catch (error) {
-      print(error);
-    }
+    await Wifi.getCurrentWifiInformation();
+    // var bandUserInfo = _getPersonalInfo();
+    //
+    // try {
+    //   await widget.characteristic.write(bandUserInfo, withoutResponse: false);
+    //   print(_value);
+    // } catch (error) {
+    //   print(error);
+    // }
   }
 
   @override
