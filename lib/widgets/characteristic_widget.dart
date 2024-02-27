@@ -64,6 +64,10 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
       return;
     }
 
+    if (!context.mounted) {
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => PasswordDialog(

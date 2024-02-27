@@ -72,6 +72,11 @@ class _PasswordDialogState extends State<PasswordDialog> {
 
               await widget.characteristic.write(utf16WifiInfo);
             }
+
+            if (!context.mounted) {
+              return;
+            }
+
             Navigator.of(context).pop();
           },
           child: const Text('Send'),
