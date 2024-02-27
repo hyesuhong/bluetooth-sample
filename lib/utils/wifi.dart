@@ -4,7 +4,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 class Wifi {
-  static getCurrentWifiInformation() async {
+  static Future<String> getCurrentWifiSSID() async {
+    String ssid = '';
     try {
       PermissionStatus? status = await getPermissionWifi();
       if (status == null) {
@@ -15,16 +16,24 @@ class Wifi {
         throw Exception('Location Permission is denied');
       }
 
-      print(await WiFiForIoTPlugin.isEnabled());
+      var isWifiEnabled = await WiFiForIoTPlugin.isEnabled();
+
+      if (!isWifiEnabled) {
+        throw Exception('Wifi is turned off. Please turn on Wifi.');
+      }
 
       var curWifiSSID = await WiFiForIoTPlugin.getSSID();
 
-      print(curWifiSSID);
+      if (curWifiSSID == null) {
+        throw Exception('Cannot get current wifi ssid');
+      }
 
-      var wifiList = await WiFiForIoTPlugin.loadWifiList();
+      ssid = curWifiSSID;
     } catch (error) {
       print(error);
     }
+
+    return ssid;
   }
 
   static Future<PermissionStatus?> getPermissionWifi() async {
@@ -52,5 +61,35 @@ class Wifi {
 
   static bool _canAccess(PermissionStatus status) {
     return status.isGranted || status.isLimited || status.isProvisional;
+  }
+
+  static Future<bool> connectWithResponse(String ssid, String? password) async {
+    bool isSuccess = false;
+
+    try {
+      await disconnect();
+
+      final response = await WiFiForIoTPlugin.connect(ssid,
+          password: password, security: NetworkSecurity.WPA);
+
+      if (!response) {
+        throw Exception('Cannot connect to $ssid. Please check password.');
+      }
+
+      isSuccess = response;
+
+      await WiFiForIoTPlugin.forceWifiUsage(true);
+    } catch (error) {
+      print('connect error: $error');
+    }
+
+    return isSuccess;
+  }
+
+  static Future<void> disconnect() async {
+    final response = await WiFiForIoTPlugin.disconnect();
+    print('wifi disconnection request result: $response');
+
+    await WiFiForIoTPlugin.forceWifiUsage(false);
   }
 }
