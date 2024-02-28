@@ -23,14 +23,13 @@ class _PasswordDialogState extends State<PasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Enter wifi password'),
+      title: const Text('와이파이 비밀번호 입력'),
       content: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-                'Please enter current wifi\'s password to send wifi information.'),
+            const Text('와이파이에 대한 정보를 전달하기 위해, 현재 와이파이의 비밀번호를 입력해주세요.'),
             const SizedBox(height: 16),
             Text(
               widget.ssid,
@@ -43,7 +42,7 @@ class _PasswordDialogState extends State<PasswordDialog> {
               obscureText: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Password',
+                hintText: '비밀번호',
               ),
               onChanged: (String value) {
                 password = value;
@@ -56,9 +55,8 @@ class _PasswordDialogState extends State<PasswordDialog> {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-            print('cancel');
           },
-          child: const Text('Cancel'),
+          child: const Text('취소'),
         ),
         TextButton(
           onPressed: () async {
@@ -79,7 +77,7 @@ class _PasswordDialogState extends State<PasswordDialog> {
 
             Navigator.of(context).pop();
           },
-          child: const Text('Send'),
+          child: const Text('확인'),
         ),
       ],
     );

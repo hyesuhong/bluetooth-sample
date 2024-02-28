@@ -28,7 +28,6 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     _lastValueSubscription =
         widget.characteristic.lastValueStream.listen((value) {
       _value = value;
-      print('uuid: ${widget.characteristic.uuid}, value: $value');
       if (mounted) {
         setState(() {});
       }
@@ -60,14 +59,54 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     bool wifiEnabled = await Wifi.isEnabled();
 
     if (!wifiEnabled) {
-      print('Wifi is turned off. Please turn on Wifi.');
+      if (!context.mounted) {
+        return;
+      }
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('와이파이 활성화'),
+            content: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '와이파이가 현재 꺼져있습니다. 설정에서 와이파이 전원을 켜십시오.',
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Wifi.setEnabled(true);
+                  if (!context.mounted) {
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: const Text('설정 열기'),
+              ),
+            ],
+          );
+        },
+      );
       return;
     }
 
     String ssid = await Wifi.getCurrentWifiSSID();
 
     if (ssid.isEmpty) {
-      print('Cannot get ssid');
+      print('ssid를 가져올 수 없습니다.');
       return;
     }
 
@@ -88,11 +127,11 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     return [
       TextButton(
         onPressed: _onWriteUserInfoPressed,
-        child: const Text('Write getting user info'),
+        child: const Text('Write(유저 정보)'),
       ),
       TextButton(
         onPressed: _onWriteWifiPressed,
-        child: const Text('Write wifi'),
+        child: const Text('Write(wifi)'),
       ),
     ];
   }

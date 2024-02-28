@@ -52,7 +52,7 @@ class ScanDeviceWidget extends StatelessWidget {
               Text(result.rssi.toString()),
               FilledButton(
                 onPressed: result.advertisementData.connectable ? onTap : null,
-                child: const Text('Connect'),
+                child: const Text('연결'),
               ),
             ],
           ),
