@@ -4,6 +4,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 class Wifi {
+  static Future<bool> isEnabled() async {
+    bool wifiEnabled = await WiFiForIoTPlugin.isEnabled();
+
+    return wifiEnabled;
+  }
+
   static Future<String> getCurrentWifiSSID() async {
     String ssid = '';
     try {
@@ -14,12 +20,6 @@ class Wifi {
 
       if (!_canAccess(status)) {
         throw Exception('Location Permission is denied');
-      }
-
-      var isWifiEnabled = await WiFiForIoTPlugin.isEnabled();
-
-      if (!isWifiEnabled) {
-        throw Exception('Wifi is turned off. Please turn on Wifi.');
       }
 
       var curWifiSSID = await WiFiForIoTPlugin.getSSID();

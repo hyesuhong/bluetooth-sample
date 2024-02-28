@@ -57,6 +57,13 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Future _onWriteWifiPressed() async {
+    bool wifiEnabled = await Wifi.isEnabled();
+
+    if (!wifiEnabled) {
+      print('Wifi is turned off. Please turn on Wifi.');
+      return;
+    }
+
     String ssid = await Wifi.getCurrentWifiSSID();
 
     if (ssid.isEmpty) {
