@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bluetooth_sample/widgets/loading_widget.dart';
 import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -16,11 +17,15 @@ class DeviceScreen extends StatefulWidget {
 class _DeviceScreenState extends State<DeviceScreen> {
   BluetoothConnectionState _connectionState =
       BluetoothConnectionState.disconnected;
+  bool _isConnecting = false;
   List<BluetoothService> _services = [];
   int? _rssi;
 
   late StreamSubscription<BluetoothConnectionState>
       _connectionStateSubscription;
+
+  bool get isConnected =>
+      _connectionState == BluetoothConnectionState.connected;
 
   @override
   void initState() {
@@ -29,12 +34,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
     _connectionStateSubscription =
         widget.device.connectionState.listen((state) async {
       _connectionState = state;
+
       if (state == BluetoothConnectionState.connected) {
         _services = [];
+
+        _rssi ??= await widget.device.readRssi();
       }
-      if (state == BluetoothConnectionState.connected && _rssi == null) {
-        _rssi = await widget.device.readRssi();
-      }
+
       if (mounted) {
         setState(() {});
       }
@@ -49,7 +55,17 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Future _onConnectPressed() async {
-    await widget.device.connect();
+    setState(() {
+      _isConnecting = true;
+    });
+
+    try {
+      await widget.device.connect();
+    } finally {
+      setState(() {
+        _isConnecting = false;
+      });
+    }
   }
 
   Future _onDisconnectPressed() async {
@@ -57,7 +73,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Future _onGetServicesPressed() async {
-    if (_connectionState == BluetoothConnectionState.connected) {
+    if (isConnected) {
       List<BluetoothService> services = await widget.device.discoverServices();
       _services = services;
 
@@ -70,22 +86,23 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Widget _buildActionButton() {
-    return _connectionState == BluetoothConnectionState.connected
-        ? TextButton(
-            onPressed: _onDisconnectPressed,
-            child: const Text('Disconnect'),
-          )
-        : TextButton(
-            onPressed: _onConnectPressed,
-            child: const Text('Connect'),
-          );
+    return TextButton(
+      onPressed: _isConnecting
+          ? null
+          : isConnected
+              ? _onDisconnectPressed
+              : _onConnectPressed,
+      child: Text(_isConnecting
+          ? 'Connecting..'
+          : isConnected
+              ? 'Disconnect'
+              : 'Connect'),
+    );
   }
 
   Widget _buildGetServicesButton() {
-    return TextButton(
-      onPressed: _connectionState == BluetoothConnectionState.connected
-          ? _onGetServicesPressed
-          : null,
+    return FilledButton(
+      onPressed: isConnected ? _onGetServicesPressed : null,
       child: const Text('Get Services'),
     );
   }
@@ -114,7 +131,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     child: Column(
                       children: [
                         Icon(
-                          _connectionState == BluetoothConnectionState.connected
+                          isConnected
                               ? Icons.bluetooth_connected
                               : Icons.bluetooth,
                           color: Colors.grey,
