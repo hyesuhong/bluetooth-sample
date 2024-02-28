@@ -65,42 +65,42 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
       }
 
       showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Wifi disabled'),
-              content: const Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Wifi is turned off. Please open Settings and turn on Wifi.',
-                    ),
-                  ],
-                ),
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Wifi disabled'),
+            content: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Wifi is turned off. Please open Settings and turn on Wifi.',
+                  ),
+                ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await Wifi.setEnabled(true);
-                    if (!context.mounted) {
-                      return;
-                    }
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Open Settings'),
-                ),
-              ],
-            );
-          });
-      // print('Wifi is turned off. Please turn on Wifi.');
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Wifi.setEnabled(true);
+                  if (!context.mounted) {
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          );
+        },
+      );
       return;
     }
 

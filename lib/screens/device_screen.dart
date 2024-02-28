@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bluetooth_sample/widgets/loading_widget.dart';
 import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
