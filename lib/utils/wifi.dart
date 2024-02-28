@@ -10,6 +10,10 @@ class Wifi {
     return wifiEnabled;
   }
 
+  static setEnabled(bool state) async {
+    await WiFiForIoTPlugin.setEnabled(state, shouldOpenSettings: true);
+  }
+
   static Future<String> getCurrentWifiSSID() async {
     String ssid = '';
     try {
