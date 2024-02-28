@@ -28,7 +28,6 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     _lastValueSubscription =
         widget.characteristic.lastValueStream.listen((value) {
       _value = value;
-      print('uuid: ${widget.characteristic.uuid}, value: $value');
       if (mounted) {
         setState(() {});
       }
@@ -68,14 +67,14 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Wifi disabled'),
+            title: const Text('와이파이 활성화'),
             content: const Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Wifi is turned off. Please open Settings and turn on Wifi.',
+                    '와이파이가 현재 꺼져있습니다. 설정에서 와이파이 전원을 켜십시오.',
                   ),
                 ],
               ),
@@ -85,7 +84,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Cancel'),
+                child: const Text('취소'),
               ),
               TextButton(
                 onPressed: () async {
@@ -95,7 +94,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                   }
                   Navigator.of(context).pop();
                 },
-                child: const Text('Open Settings'),
+                child: const Text('설정 열기'),
               ),
             ],
           );
@@ -107,7 +106,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     String ssid = await Wifi.getCurrentWifiSSID();
 
     if (ssid.isEmpty) {
-      print('Cannot get ssid');
+      print('ssid를 가져올 수 없습니다.');
       return;
     }
 
@@ -128,11 +127,11 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     return [
       TextButton(
         onPressed: _onWriteUserInfoPressed,
-        child: const Text('Write getting user info'),
+        child: const Text('Write(유저 정보)'),
       ),
       TextButton(
         onPressed: _onWriteWifiPressed,
-        child: const Text('Write wifi'),
+        child: const Text('Write(wifi)'),
       ),
     ];
   }

@@ -99,7 +99,7 @@ class _ScanScreenState extends State<ScanScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Find Devices'),
+        title: const Text('기기 검색'),
       ),
       body: ListView.separated(
         itemCount: _scanResults.length,

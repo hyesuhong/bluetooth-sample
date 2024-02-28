@@ -19,17 +19,17 @@ class Wifi {
     try {
       PermissionStatus? status = await getPermissionWifi();
       if (status == null) {
-        throw Exception('Cannot get permission status');
+        throw Exception('앱의 위치 권한 상태를 가져올 수 없습니다.');
       }
 
       if (!_canAccess(status)) {
-        throw Exception('Location Permission is denied');
+        throw Exception('위치 권한이 거부되었습니다.');
       }
 
       var curWifiSSID = await WiFiForIoTPlugin.getSSID();
 
       if (curWifiSSID == null) {
-        throw Exception('Cannot get current wifi ssid');
+        throw Exception('현재 와이파이의 ssid 값을 가져올 수 없습니다.');
       }
 
       ssid = curWifiSSID;
@@ -48,12 +48,12 @@ class Wifi {
 
       if (status.isPermanentlyDenied) {
         print(
-            'Location permission is permanently denied. If you want to use wifi feature, change location setting.');
+            '위치 권한이 영구적으로 거부되었습니다. 와이파이와 관련된 기능을 사용하고 싶다면, 설정 > 위치에서 권한을 부여하십시오.');
       } else if (status.isProvisional || !_canAccess(status)) {
         PermissionStatus requestStatus = await Permission.location.request();
 
         if (!_canAccess(requestStatus)) {
-          print('Location permission is not granted.');
+          print('위치 권한을 얻지 못했습니다.');
         } else {
           status = requestStatus;
         }
@@ -77,7 +77,7 @@ class Wifi {
           password: password, security: NetworkSecurity.WPA);
 
       if (!response) {
-        throw Exception('Cannot connect to $ssid. Please check password.');
+        throw Exception('$ssid 에 연결할 수 없습니다. 입력한 비밀번호를 확인하십시오.');
       }
 
       isSuccess = response;
@@ -92,7 +92,6 @@ class Wifi {
 
   static Future<void> disconnect() async {
     final response = await WiFiForIoTPlugin.disconnect();
-    print('wifi disconnection request result: $response');
 
     await WiFiForIoTPlugin.forceWifiUsage(false);
   }

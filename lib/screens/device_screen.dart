@@ -92,17 +92,17 @@ class _DeviceScreenState extends State<DeviceScreen> {
               ? _onDisconnectPressed
               : _onConnectPressed,
       child: Text(_isConnecting
-          ? 'Connecting..'
+          ? '연결중..'
           : isConnected
-              ? 'Disconnect'
-              : 'Connect'),
+              ? '연결 끊기'
+              : '연결'),
     );
   }
 
   Widget _buildGetServicesButton() {
     return FilledButton(
       onPressed: isConnected ? _onGetServicesPressed : null,
-      child: const Text('Get Services'),
+      child: const Text('Services 가져오기'),
     );
   }
 
@@ -146,7 +146,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     ),
                   ),
                   Expanded(
-                    child: Text('Device is ${_connectionState.name}.'),
+                    child: Text('기기 연결 상태: ${_connectionState.name}.'),
                   ),
                   _buildGetServicesButton(),
                 ],
