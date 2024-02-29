@@ -88,15 +88,11 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Widget _buildFloatingButton() {
-    return FlutterBluePlus.isScanningNow
-        ? FloatingActionButton(
-            onPressed: onStopPressed,
-            child: const Icon(Icons.stop),
-          )
-        : FloatingActionButton(
-            onPressed: onScanPressed,
-            child: const Icon(Icons.search),
-          );
+    return FloatingActionButton(
+      shape: const CircleBorder(),
+      onPressed: FlutterBluePlus.isScanningNow ? onStopPressed : onScanPressed,
+      child: Icon(FlutterBluePlus.isScanningNow ? Icons.stop : Icons.search),
+    );
   }
 
   void onConnectPressed(BluetoothDevice device) {
