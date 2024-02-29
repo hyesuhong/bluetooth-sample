@@ -31,6 +31,12 @@ class Wifi {
 
       if (curWifiSSID == null) {
         throw Exception('현재 와이파이의 ssid 값을 가져올 수 없습니다.');
+      } else {
+        if (curWifiSSID.isEmpty) {
+          throw Exception('ssid를 가져올 수 없습니다.');
+        } else if (curWifiSSID == '<unknown ssid>') {
+          throw Exception('연결된 와이파이의 정보를 정확히 가져오지 못했습니다. 잠시 후 다시 시도해주십시오.');
+        }
       }
 
       ssid = curWifiSSID;

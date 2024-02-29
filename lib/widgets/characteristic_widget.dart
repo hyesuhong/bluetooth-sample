@@ -109,16 +109,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
     String ssid = await Wifi.getCurrentWifiSSID();
 
-    if (ssid.isEmpty || ssid == '<unknown ssid>') {
-      CustomSnackBar.show(
-        status: SnackBarStatus.error,
-        message: 'ssid를 가져올 수 없습니다.',
-      );
-
-      return;
-    }
-
-    if (!context.mounted) {
+    if (ssid.isEmpty || !context.mounted) {
       return;
     }
 
