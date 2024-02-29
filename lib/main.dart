@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bluetooth_sample/screens/bluetooth_off_screen.dart';
 import 'package:bluetooth_sample/screens/scan_screen.dart';
+import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -48,13 +49,13 @@ class _MyAppState extends State<MyApp> {
         ? const ScanScreen()
         : BluetoothOffScreen(adapterState: _adapterState);
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       home: screen,
       navigatorObservers: [BluetoothAdapterStateObserver()],
+      scaffoldMessengerKey: CustomSnackBar.getSnackBarKey(),
     );
   }
 }
