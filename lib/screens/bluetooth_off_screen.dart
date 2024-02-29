@@ -48,9 +48,6 @@ class BluetoothOffScreen extends StatelessWidget {
           onPressed: () async {
             await FlutterBluePlus.turnOn();
           },
-          // style: ButtonStyle(
-          //   backgroundColor: Colors.white54,
-          // ),
           child: const Text('블루투스 켜기'),
         ),
       ],

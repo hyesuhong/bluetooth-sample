@@ -40,6 +40,16 @@ class _DeviceScreenState extends State<DeviceScreen> {
         _services = [];
 
         _rssi ??= await widget.device.readRssi();
+      } else if (state == BluetoothConnectionState.disconnected) {
+        if (widget.device.disconnectReason != null) {
+          final int? code = widget.device.disconnectReason!.code;
+          final isSuccess = code != null && code == 0;
+          final msg = widget.device.disconnectReason!.description;
+          CustomSnackBar.show(
+            status: isSuccess ? SnackBarStatus.info : SnackBarStatus.error,
+            message: msg ?? '기기와 연결이 끊어졌습니다.',
+          );
+        }
       }
 
       if (mounted) {
@@ -58,7 +68,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   void dispose() {
     _connectionStateSubscription.cancel();
 
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid && isConnected) {
       widget.device.clearGattCache();
     }
 
@@ -72,6 +82,16 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
     try {
       await widget.device.connect();
+
+      CustomSnackBar.show(
+        status: SnackBarStatus.success,
+        message: '${widget.device.advName} 에 연결되었습니다.',
+      );
+    } catch (error) {
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
     } finally {
       setState(() {
         _isConnecting = false;
@@ -87,8 +107,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     if (isConnected) {
       List<BluetoothService> services = await widget.device.discoverServices();
       _services = services;
-
-      print(services);
 
       if (mounted) {
         setState(() {});
@@ -134,6 +152,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
           child: Column(
             children: [
               Text(widget.device.remoteId.str),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Container(

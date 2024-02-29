@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -63,13 +64,22 @@ class _PasswordDialogState extends State<PasswordDialog> {
             bool isSuccessConnect =
                 await Wifi.connectWithResponse(widget.ssid, password);
 
-            if (isSuccessConnect) {
-              final wifiInfo = {'ssid': widget.ssid, 'pwd': password};
-              final encodedWifiInfo = jsonEncode(wifiInfo);
-              final utf16WifiInfo = encodedWifiInfo.codeUnits;
-
-              await widget.characteristic.write(utf16WifiInfo);
+            if (!isSuccessConnect) {
+              return;
             }
+
+            final wifiInfo = {'ssid': widget.ssid, 'pwd': password};
+            final encodedWifiInfo = jsonEncode(wifiInfo);
+            final utf16WifiInfo = encodedWifiInfo.codeUnits;
+
+            await widget.characteristic
+                .write(utf16WifiInfo)
+                .catchError((error) {
+              CustomSnackBar.show(
+                status: SnackBarStatus.error,
+                message: error.toString(),
+              );
+            });
 
             if (!context.mounted) {
               return;

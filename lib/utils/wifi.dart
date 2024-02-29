@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
@@ -34,7 +35,10 @@ class Wifi {
 
       ssid = curWifiSSID;
     } catch (error) {
-      print(error);
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
     }
 
     return ssid;
@@ -47,13 +51,19 @@ class Wifi {
       status = await Permission.location.status;
 
       if (status.isPermanentlyDenied) {
-        print(
-            '위치 권한이 영구적으로 거부되었습니다. 와이파이와 관련된 기능을 사용하고 싶다면, 설정 > 위치에서 권한을 부여하십시오.');
+        CustomSnackBar.show(
+          status: SnackBarStatus.error,
+          message:
+              '위치 권한이 영구적으로 거부되었습니다. 와이파이와 관련된 기능을 사용하고 싶다면, 설정 > 위치에서 권한을 부여하십시오.',
+        );
       } else if (status.isProvisional || !_canAccess(status)) {
         PermissionStatus requestStatus = await Permission.location.request();
 
         if (!_canAccess(requestStatus)) {
-          print('위치 권한을 얻지 못했습니다.');
+          CustomSnackBar.show(
+            status: SnackBarStatus.error,
+            message: '위치 권한을 얻지 못했습니다.',
+          );
         } else {
           status = requestStatus;
         }
@@ -84,14 +94,17 @@ class Wifi {
 
       await WiFiForIoTPlugin.forceWifiUsage(true);
     } catch (error) {
-      print('connect error: $error');
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
     }
 
     return isSuccess;
   }
 
   static Future<void> disconnect() async {
-    final response = await WiFiForIoTPlugin.disconnect();
+    await WiFiForIoTPlugin.disconnect();
 
     await WiFiForIoTPlugin.forceWifiUsage(false);
   }

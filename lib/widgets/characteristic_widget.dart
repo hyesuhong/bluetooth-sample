@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:bluetooth_sample/widgets/password_dialog.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,10 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     try {
       await widget.characteristic.write(bandUserInfo, withoutResponse: false);
     } catch (error) {
-      print(error);
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
     }
   }
 
@@ -105,8 +109,12 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
     String ssid = await Wifi.getCurrentWifiSSID();
 
-    if (ssid.isEmpty) {
-      print('ssid를 가져올 수 없습니다.');
+    if (ssid.isEmpty || ssid == '<unknown ssid>') {
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: 'ssid를 가져올 수 없습니다.',
+      );
+
       return;
     }
 
