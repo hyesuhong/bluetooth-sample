@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -44,11 +46,21 @@ class _DeviceScreenState extends State<DeviceScreen> {
         setState(() {});
       }
     });
+
+    widget.device.cancelWhenDisconnected(
+      _connectionStateSubscription,
+      delayed: true,
+      next: true,
+    );
   }
 
   @override
   void dispose() {
     _connectionStateSubscription.cancel();
+
+    if (Platform.isAndroid) {
+      widget.device.clearGattCache();
+    }
 
     super.dispose();
   }
