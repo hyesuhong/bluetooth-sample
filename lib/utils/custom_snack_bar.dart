@@ -74,15 +74,8 @@ class CustomSnackBar {
 
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
         getSnackBarKey();
-    print(scaffoldMessengerKey.toString());
 
     scaffoldMessengerKey.currentState?.removeCurrentSnackBar();
     scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
-    // ScaffoldMessenger(
-    //   key: scaffoldMessengerKey,
-    //   child: snackBar,
-    // );
-
-    // getSnackBar(status).currentState?.removeCurrentSnackBar();
   }
 }
