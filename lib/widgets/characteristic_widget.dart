@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:bluetooth_sample/widgets/password_dialog.dart';
 import 'package:flutter/material.dart';
@@ -140,6 +139,11 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     );
   }
 
+  Widget _buildDecodedValueText(List<int> value) {
+    final decodedValue = value.map((e) => String.fromCharCode(e)).join('');
+    return Text(decodedValue);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -163,6 +167,8 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
             ],
           ),
           Text(_value.toString()),
+          if (_value.isNotEmpty && _value[0] == 123)
+            _buildDecodedValueText(_value),
         ],
       ),
     );
