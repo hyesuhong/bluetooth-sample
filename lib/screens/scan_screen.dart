@@ -37,8 +37,6 @@ class _ScanScreenState extends State<ScanScreen> {
       );
     });
 
-    FlutterBluePlus.cancelWhenScanComplete(_scanResultsSubscription);
-
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       if (mounted) {
         setState(() {});
@@ -60,6 +58,7 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future onScanPressed() async {
+    // _scanResults = [];
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     } catch (error) {
