@@ -1,10 +1,14 @@
 import 'dart:io';
 
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 class Wifi {
+  static const _MIN_HERTZ = 2400;
+  static const _MAX_HERTZ = 2462;
+
   static Future<bool> isEnabled() async {
     bool wifiEnabled = await WiFiForIoTPlugin.isEnabled();
 
@@ -15,31 +19,69 @@ class Wifi {
     await WiFiForIoTPlugin.setEnabled(state, shouldOpenSettings: true);
   }
 
+  static _is2_4GHZ(int frequency) {
+    return frequency <= _MAX_HERTZ && frequency >= _MIN_HERTZ;
+  }
+
   static Future<String> getCurrentWifiSSID() async {
     String ssid = '';
     try {
       PermissionStatus? status = await getPermissionWifi();
       if (status == null) {
-        throw Exception('앱의 위치 권한 상태를 가져올 수 없습니다.');
+        throw WifiException(message: '앱의 위치 권한 상태를 가져올 수 없습니다.');
       }
 
       if (!_canAccess(status)) {
-        throw Exception('위치 권한이 거부되었습니다.');
+        throw WifiException(message: '위치 권한이 거부되었습니다.');
       }
 
-      var curWifiSSID = await WiFiForIoTPlugin.getSSID();
+      final isConnected = await WiFiForIoTPlugin.isConnected();
+      if (!isConnected) {
+        throw WifiException(
+          message:
+              '연결된 와이파이가 없습니다.\n와이파이가 자동으로 연결될 때까지 기다린 뒤 다시 시도하거나, 설정에서 와이파이를 연결하십시오.',
+          shouldOpenSettings: true,
+        );
+      }
+
+      final frequency = await WiFiForIoTPlugin.getFrequency();
+      if (frequency == null || !_is2_4GHZ(frequency)) {
+        throw WifiException(
+          message:
+              'IoT 기기는 2.4GHz의 와이파이만 사용할 수 있습니다.\n이름 뒤에 [2G] 혹은 [2.4G]가 있는 와이파이를 선택하십시오.',
+          shouldOpenSettings: true,
+        );
+      }
+
+      final curWifiSSID = await WiFiForIoTPlugin.getSSID();
 
       if (curWifiSSID == null) {
-        throw Exception('현재 와이파이의 ssid 값을 가져올 수 없습니다.');
+        throw WifiException(message: '현재 와이파이의 ssid 값을 가져올 수 없습니다.');
       } else {
         if (curWifiSSID.isEmpty) {
-          throw Exception('ssid를 가져올 수 없습니다.');
+          throw WifiException(message: 'ssid를 가져올 수 없습니다.');
         } else if (curWifiSSID == '<unknown ssid>') {
-          throw Exception('연결된 와이파이의 정보를 정확히 가져오지 못했습니다. 잠시 후 다시 시도해주십시오.');
+          throw WifiException(
+              message: '연결된 와이파이의 정보를 정확히 가져오지 못했습니다. 잠시 후 다시 시도해주십시오.');
         }
       }
 
       ssid = curWifiSSID;
+    } on WifiException catch (error) {
+      SnackBarAction action = SnackBarAction(
+        label: '설정',
+        textColor: Colors.white,
+        onPressed: () {
+          WiFiForIoTPlugin.setEnabled(true, shouldOpenSettings: true);
+        },
+      );
+
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+        duration: const Duration(seconds: 5),
+        action: error.shouldOpenSettings ? action : null,
+      );
     } catch (error) {
       CustomSnackBar.show(
         status: SnackBarStatus.error,
@@ -114,4 +156,14 @@ class Wifi {
 
     await WiFiForIoTPlugin.forceWifiUsage(false);
   }
+}
+
+class WifiException implements Exception {
+  final String message;
+  final bool shouldOpenSettings;
+
+  WifiException({required this.message, this.shouldOpenSettings = false});
+
+  @override
+  String toString() => 'Wifi Exception: $message';
 }
