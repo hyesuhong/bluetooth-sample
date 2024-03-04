@@ -46,19 +46,6 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     await widget.characteristic.read();
   }
 
-  Future _onWriteUserInfoPressed() async {
-    var bandUserInfo = _getPersonalInfo();
-
-    try {
-      await widget.characteristic.write(bandUserInfo, withoutResponse: false);
-    } catch (error) {
-      CustomSnackBar.show(
-        status: SnackBarStatus.error,
-        message: error.toString(),
-      );
-    }
-  }
-
   Future _onWriteWifiPressed() async {
     bool wifiEnabled = await Wifi.isEnabled();
 
@@ -122,17 +109,11 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     );
   }
 
-  List<Widget> _buildWriteButtons() {
-    return [
-      TextButton(
-        onPressed: _onWriteUserInfoPressed,
-        child: const Text('Write(유저 정보)'),
-      ),
-      TextButton(
-        onPressed: _onWriteWifiPressed,
-        child: const Text('Write(wifi)'),
-      ),
-    ];
+  Widget _buildWriteButton() {
+    return TextButton(
+      onPressed: _onWriteWifiPressed,
+      child: const Text('Write(wifi)'),
+    );
   }
 
   Future _onSubscribePressed() async {
@@ -175,8 +156,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                   onPressed: _onReadPressed,
                   child: const Text('Read'),
                 ),
-              if (widget.characteristic.properties.write)
-                ..._buildWriteButtons(),
+              if (widget.characteristic.properties.write) _buildWriteButton(),
               if (widget.characteristic.properties.notify ||
                   widget.characteristic.properties.indicate)
                 _buildSubscribeButton(),
@@ -187,24 +167,4 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
       ),
     );
   }
-}
-
-// LNB1: Get User Personal Information
-const CMD_GET_USERINFO = 0x42;
-List<int> _getPersonalInfo() {
-  List<int> value = List.filled(16, 0);
-  value[0] = CMD_GET_USERINFO;
-  var crc = _crcValue(value);
-  value[value.length - 1] = crc;
-
-  return value;
-}
-
-int _crcValue(List<int> value) {
-  int crc = 0;
-  for (var i = 0; i < value.length - 1; i++) {
-    crc += value[i];
-  }
-
-  return crc & 0xff;
 }
