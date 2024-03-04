@@ -17,7 +17,6 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   List<ScanResult> _scanResults = [];
-  // bool _isScanning = false;
 
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
@@ -41,7 +40,6 @@ class _ScanScreenState extends State<ScanScreen> {
     FlutterBluePlus.cancelWhenScanComplete(_scanResultsSubscription);
 
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
-      // _isScanning = state;
       if (mounted) {
         setState(() {});
       }
