@@ -15,24 +15,22 @@ class Wifi {
     return wifiEnabled;
   }
 
-  static setEnabled(bool state) async {
+  static Future setEnabled(bool state) async {
     await WiFiForIoTPlugin.setEnabled(state, shouldOpenSettings: true);
   }
 
-  static _is2_4GHZ(int frequency) {
+  static bool _is2_4GHZ(int frequency) {
     return frequency <= _MAX_HERTZ && frequency >= _MIN_HERTZ;
   }
 
   static Future<String> getCurrentWifiSSID() async {
     String ssid = '';
     try {
-      PermissionStatus? status = await getPermissionWifi();
-      if (status == null) {
-        throw WifiException(message: '앱의 위치 권한 상태를 가져올 수 없습니다.');
-      }
-
-      if (!_canAccess(status)) {
-        throw WifiException(message: '위치 권한이 거부되었습니다.');
+      bool accessible = await hasPermission();
+      if (!accessible) {
+        throw WifiException(
+            message:
+                '앱의 위치 권한이 설정되지 않았습니다. 와이파이와 관련된 기능을 사용하려면, 설정 > 위치에서 권한을 부여하십시오.');
       }
 
       final isConnected = await WiFiForIoTPlugin.isConnected();
@@ -92,33 +90,19 @@ class Wifi {
     return ssid;
   }
 
-  static Future<PermissionStatus?> getPermissionWifi() async {
+  static Future<bool> hasPermission() async {
     PermissionStatus? status;
 
     if (Platform.isAndroid) {
       status = await Permission.location.status;
 
-      if (status.isPermanentlyDenied) {
-        CustomSnackBar.show(
-          status: SnackBarStatus.error,
-          message:
-              '위치 권한이 영구적으로 거부되었습니다. 와이파이와 관련된 기능을 사용하고 싶다면, 설정 > 위치에서 권한을 부여하십시오.',
-        );
-      } else if (status.isProvisional || !_canAccess(status)) {
+      if (status.isProvisional || !_canAccess(status)) {
         PermissionStatus requestStatus = await Permission.location.request();
-
-        if (!_canAccess(requestStatus)) {
-          CustomSnackBar.show(
-            status: SnackBarStatus.error,
-            message: '위치 권한을 얻지 못했습니다.',
-          );
-        } else {
-          status = requestStatus;
-        }
+        status = requestStatus;
       }
     }
 
-    return status;
+    return status != null && _canAccess(status);
   }
 
   static bool _canAccess(PermissionStatus status) {
