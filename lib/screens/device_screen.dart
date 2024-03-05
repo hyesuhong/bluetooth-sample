@@ -44,11 +44,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
         if (widget.device.disconnectReason != null) {
           final int? code = widget.device.disconnectReason!.code;
           final isSuccess = code != null && code == 0;
-          final msg = widget.device.disconnectReason!.description;
-          CustomSnackBar.show(
-            status: isSuccess ? SnackBarStatus.info : SnackBarStatus.error,
-            message: msg ?? '기기와 연결이 끊어졌습니다.',
-          );
+          if (!isSuccess) {
+            final msg = widget.device.disconnectReason!.description;
+            CustomSnackBar.show(
+              status: SnackBarStatus.error,
+              message: msg ?? '기기와 연결이 끊어졌습니다.',
+            );
+          }
         }
       }
 
@@ -56,21 +58,16 @@ class _DeviceScreenState extends State<DeviceScreen> {
         setState(() {});
       }
     });
-
-    widget.device.cancelWhenDisconnected(
-      _connectionStateSubscription,
-      delayed: true,
-      next: true,
-    );
   }
 
   @override
   void dispose() {
-    _connectionStateSubscription.cancel();
-
     if (Platform.isAndroid && isConnected) {
       widget.device.clearGattCache();
     }
+
+    widget.device.disconnect();
+    _connectionStateSubscription.cancel();
 
     super.dispose();
   }
