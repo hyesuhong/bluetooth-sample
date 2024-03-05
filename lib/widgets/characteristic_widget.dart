@@ -19,6 +19,7 @@ class CharacteristicWidget extends StatefulWidget {
 
 class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   List<int> _value = [];
+  final dialogContextCompleter = Completer<BuildContext>();
 
   late StreamSubscription<List<int>> _lastValueSubscription;
 
@@ -26,20 +27,32 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   void initState() {
     super.initState();
 
-    _lastValueSubscription =
-        widget.characteristic.lastValueStream.listen((value) {
-      _value = value;
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    _lastValueSubscription = widget.characteristic.lastValueStream.listen(
+      (value) {
+        _value = value;
+        if (mounted) {
+          setState(() {});
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
-    _lastValueSubscription.cancel();
-
     super.dispose();
+
+    _lastValueSubscription.cancel();
+    _closeDialog();
+  }
+
+  Future _closeDialog() async {
+    final dialogContext = await dialogContextCompleter.future;
+
+    if (!dialogContext.mounted) {
+      return;
+    }
+
+    Navigator.of(dialogContext).pop();
   }
 
   Future _onReadPressed() async {
@@ -56,7 +69,12 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
       showDialog(
         context: context,
+        barrierDismissible: true,
         builder: (context) {
+          if (!dialogContextCompleter.isCompleted) {
+            dialogContextCompleter.complete(context);
+          }
+
           return AlertDialog(
             title: const Text('와이파이 활성화'),
             content: const Padding(
@@ -102,10 +120,16 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
     showDialog(
       context: context,
-      builder: (context) => PasswordDialog(
-        ssid: ssid,
-        characteristic: widget.characteristic,
-      ),
+      builder: (context) {
+        if (!dialogContextCompleter.isCompleted) {
+          dialogContextCompleter.complete(context);
+        }
+
+        return PasswordDialog(
+          ssid: ssid,
+          characteristic: widget.characteristic,
+        );
+      },
     );
   }
 

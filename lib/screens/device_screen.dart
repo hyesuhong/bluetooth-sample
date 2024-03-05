@@ -35,10 +35,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
     _connectionStateSubscription =
         widget.device.connectionState.listen((state) async {
       _connectionState = state;
+      _services = [];
 
       if (state == BluetoothConnectionState.connected) {
-        _services = [];
-
         _rssi ??= await widget.device.readRssi();
       } else if (state == BluetoothConnectionState.disconnected) {
         if (widget.device.disconnectReason != null) {
