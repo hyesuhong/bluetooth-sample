@@ -139,6 +139,40 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     );
   }
 
+  Widget _buildValueText(List<int> value) {
+    final isJSON = value.isNotEmpty && value.first == 123 && value.last == 125;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            vertical: 4,
+            horizontal: 8,
+          ),
+          margin: const EdgeInsets.only(bottom: 4),
+          color: Colors.grey[100],
+          child: const Text('Characteristic\'s value'),
+        ),
+        Text(value.toString()),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            vertical: 4,
+            horizontal: 8,
+          ),
+          margin: const EdgeInsets.only(bottom: 4),
+          color: Colors.grey[100],
+          child: const Text('JSON (displayed if the value format is JSON)'),
+        ),
+        if (isJSON) _buildDecodedValueText(_value),
+      ],
+    );
+  }
+
   Widget _buildDecodedValueText(List<int> value) {
     final decodedValue = value.map((e) => String.fromCharCode(e)).join('');
     return Text(decodedValue);
@@ -146,13 +180,31 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Characteristic'),
-          Text(widget.characteristic.characteristicUuid.str),
+          Text.rich(
+            TextSpan(
+              text: 'Characteristic',
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+              children: [
+                TextSpan(
+                  text: ' (${widget.characteristic.characteristicUuid.str})',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
           Row(
             children: [
               if (widget.characteristic.properties.read)
@@ -166,9 +218,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
                 _buildSubscribeButton(),
             ],
           ),
-          Text(_value.toString()),
-          if (_value.isNotEmpty && _value[0] == 123)
-            _buildDecodedValueText(_value),
+          _buildValueText(_value),
         ],
       ),
     );

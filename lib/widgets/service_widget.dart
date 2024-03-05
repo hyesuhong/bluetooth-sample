@@ -8,9 +8,9 @@ class ServiceWidget extends StatelessWidget {
 
   Widget _buildCharacteristicsList(
       List<BluetoothCharacteristic> characteristics) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: ListView.builder(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: characteristics.length,
@@ -18,6 +18,9 @@ class ServiceWidget extends StatelessWidget {
           BluetoothCharacteristic characteristic =
               service.characteristics[index];
           return CharacteristicWidget(characteristic: characteristic);
+        },
+        separatorBuilder: (context, index) {
+          return Divider(color: Colors.grey[200]);
         },
       ),
     );
