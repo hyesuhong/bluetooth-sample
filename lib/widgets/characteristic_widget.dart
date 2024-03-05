@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:bluetooth_sample/widgets/password_dialog.dart';
+import 'package:bluetooth_sample/widgets/subtitle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -146,28 +147,11 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
-          margin: const EdgeInsets.only(bottom: 4),
-          color: Colors.grey[100],
-          child: const Text('Characteristic\'s value'),
-        ),
+        const SubtitleWidget(title: 'Characteristic\'s value'),
         Text(value.toString()),
         const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
-          margin: const EdgeInsets.only(bottom: 4),
-          color: Colors.grey[100],
-          child: const Text('JSON (displayed if the value format is JSON)'),
-        ),
+        const SubtitleWidget(
+            title: 'JSON (displayed if the value format is JSON)'),
         if (isJSON) _buildDecodedValueText(_value),
       ],
     );
