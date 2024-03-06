@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bluetooth_sample/screens/wifi/wifi_info_screen.dart';
 import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:bluetooth_sample/widgets/password_dialog.dart';
 import 'package:bluetooth_sample/widgets/subtitle_widget.dart';
@@ -59,79 +60,87 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     await widget.characteristic.read();
   }
 
-  Future _onWriteWifiPressed() async {
-    bool wifiEnabled = await Wifi.isEnabled();
-
-    if (!wifiEnabled) {
-      if (!context.mounted) {
-        return;
-      }
-
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) {
-          if (!dialogContextCompleter.isCompleted) {
-            dialogContextCompleter.complete(context);
-          }
-
-          return AlertDialog(
-            title: const Text('와이파이 활성화'),
-            content: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '와이파이가 현재 꺼져있습니다. 설정에서 와이파이 전원을 켜십시오.',
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('취소'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await Wifi.setEnabled(true);
-                  if (!context.mounted) {
-                    return;
-                  }
-                  Navigator.of(context).pop();
-                },
-                child: const Text('설정 열기'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-
-    String ssid = await Wifi.getCurrentWifiSSID();
-
-    if (ssid.isEmpty || !context.mounted) {
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        if (!dialogContextCompleter.isCompleted) {
-          dialogContextCompleter.complete(context);
-        }
-
-        return PasswordDialog(
-          ssid: ssid,
-          characteristic: widget.characteristic,
-        );
-      },
+  _onWriteWifiPressed() {
+    MaterialPageRoute route = MaterialPageRoute(
+      builder: (context) => const WifiInfoScreen(),
+      settings: const RouteSettings(name: '/wifi/info'),
     );
+    Navigator.of(context).push(route);
   }
+
+  // Future _onWriteWifiPressed() async {
+  //   bool wifiEnabled = await Wifi.isEnabled();
+  //
+  //   if (!wifiEnabled) {
+  //     if (!context.mounted) {
+  //       return;
+  //     }
+  //
+  //     showDialog(
+  //       context: context,
+  //       barrierDismissible: true,
+  //       builder: (context) {
+  //         if (!dialogContextCompleter.isCompleted) {
+  //           dialogContextCompleter.complete(context);
+  //         }
+  //
+  //         return AlertDialog(
+  //           title: const Text('와이파이 활성화'),
+  //           content: const Padding(
+  //             padding: EdgeInsets.all(16),
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Text(
+  //                   '와이파이가 현재 꺼져있습니다. 설정에서 와이파이 전원을 켜십시오.',
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //               child: const Text('취소'),
+  //             ),
+  //             TextButton(
+  //               onPressed: () async {
+  //                 await Wifi.setEnabled(true);
+  //                 if (!context.mounted) {
+  //                   return;
+  //                 }
+  //                 Navigator.of(context).pop();
+  //               },
+  //               child: const Text('설정 열기'),
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //     return;
+  //   }
+  //
+  //   String ssid = await Wifi.getCurrentWifiSSID();
+  //
+  //   if (ssid.isEmpty || !context.mounted) {
+  //     return;
+  //   }
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       if (!dialogContextCompleter.isCompleted) {
+  //         dialogContextCompleter.complete(context);
+  //       }
+  //
+  //       return PasswordDialog(
+  //         ssid: ssid,
+  //         characteristic: widget.characteristic,
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildWriteButton() {
     return TextButton(
