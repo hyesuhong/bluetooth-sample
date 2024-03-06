@@ -135,6 +135,33 @@ class Wifi {
     return isSuccess;
   }
 
+  static Future<bool> findAndConnect(String ssid, String? password) async {
+    bool isSuccess = false;
+
+    try {
+      await disconnect();
+
+      final response =
+          await WiFiForIoTPlugin.findAndConnect(ssid, password: password);
+
+      print(response);
+
+      if (!response) {
+        throw WifiException(message: '$ssid에 연결할 수 없습니다.');
+      }
+
+      isSuccess = response;
+
+      await WiFiForIoTPlugin.forceWifiUsage(true);
+    } catch (error) {
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
+    }
+    return isSuccess;
+  }
+
   static Future<void> disconnect() async {
     await WiFiForIoTPlugin.disconnect();
 

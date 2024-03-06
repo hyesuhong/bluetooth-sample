@@ -63,7 +63,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   _onWriteWifiPressed() {
     MaterialPageRoute route = MaterialPageRoute(
       builder: (context) => const WifiInfoScreen(),
-      settings: const RouteSettings(name: '/wifi/info'),
+      settings: const RouteSettings(name: '/wifi'),
     );
     Navigator.of(context).push(route);
   }

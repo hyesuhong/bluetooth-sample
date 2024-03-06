@@ -1,3 +1,4 @@
+import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
 import 'package:bluetooth_sample/utils/wifi.dart';
 import 'package:flutter/material.dart';
 
@@ -130,7 +131,12 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
       return;
     }
 
-    print('try connect wifi');
+    MaterialPageRoute route = MaterialPageRoute(
+      builder: (context) =>
+          WifiConnectionScreen(ssid: _wifiSSID!, password: _password),
+      settings: const RouteSettings(name: '/wifi/connection'),
+    );
+    Navigator.of(context).push(route);
   }
 
   @override
