@@ -1,5 +1,5 @@
 import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
-import 'package:bluetooth_sample/utils/wifi.dart';
+import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:flutter/material.dart';
 
 class WifiInfoScreen extends StatefulWidget {

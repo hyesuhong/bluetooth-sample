@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bluetooth_sample/screens/wifi/wifi_info_screen.dart';
-import 'package:bluetooth_sample/utils/wifi.dart';
+import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/widgets/password_dialog.dart';
 import 'package:bluetooth_sample/widgets/subtitle_widget.dart';
 import 'package:flutter/material.dart';

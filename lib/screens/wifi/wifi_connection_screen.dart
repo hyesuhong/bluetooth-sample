@@ -1,4 +1,4 @@
-import 'package:bluetooth_sample/utils/wifi.dart';
+import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:flutter/material.dart';
 
 class WifiConnectionScreen extends StatefulWidget {
