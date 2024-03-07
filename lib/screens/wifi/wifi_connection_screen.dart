@@ -1,11 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-
 import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/wifi_result_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class WifiConnectionScreen extends StatefulWidget {
   final String ssid;
@@ -27,7 +26,7 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
   bool _isSuccess = false;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
 
     _findAndConnect();

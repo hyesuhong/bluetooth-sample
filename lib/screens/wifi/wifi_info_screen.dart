@@ -20,6 +20,8 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   String _password = '';
   String? _wifiSSID;
 
+  FocusNode focusInputNode = FocusNode();
+
   bool get _canPush =>
       _wifiSSID != null &&
       (!_hasPassword || (_hasPassword && _password.isNotEmpty));
@@ -31,6 +33,12 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     if (mounted) {
       _checkCurrentWifi();
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    focusInputNode.dispose();
   }
 
   Future _checkCurrentWifi() async {
@@ -116,6 +124,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     return Container(
       constraints: const BoxConstraints(maxWidth: 400),
       child: TextField(
+        focusNode: focusInputNode,
         obscureText: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
@@ -144,6 +153,10 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
       settings: const RouteSettings(name: '/wifi/connection'),
     );
     Navigator.of(context).push(route);
+
+    if (focusInputNode.hasFocus) {
+      focusInputNode.unfocus();
+    }
   }
 
   @override
