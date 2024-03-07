@@ -1,9 +1,14 @@
 import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
 import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class WifiInfoScreen extends StatefulWidget {
-  const WifiInfoScreen({super.key});
+  final BluetoothCharacteristic characteristic;
+  const WifiInfoScreen({
+    super.key,
+    required this.characteristic,
+  });
 
   @override
   State<WifiInfoScreen> createState() => _WifiInfoScreenState();
@@ -131,8 +136,11 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     }
 
     MaterialPageRoute route = MaterialPageRoute(
-      builder: (context) =>
-          WifiConnectionScreen(ssid: _wifiSSID!, password: _password),
+      builder: (context) => WifiConnectionScreen(
+        ssid: _wifiSSID!,
+        password: _password,
+        characteristic: widget.characteristic,
+      ),
       settings: const RouteSettings(name: '/wifi/connection'),
     );
     Navigator.of(context).push(route);
