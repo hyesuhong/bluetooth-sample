@@ -76,7 +76,6 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
               _password = '';
             }
           });
-          print('check: $value');
         },
         title: const Text('비밀번호 사용 여부'),
       ),

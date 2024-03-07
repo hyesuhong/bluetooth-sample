@@ -144,8 +144,6 @@ class Wifi {
       final response =
           await WiFiForIoTPlugin.findAndConnect(ssid, password: password);
 
-      print(response);
-
       if (!response) {
         throw WifiException(message: '$ssid에 연결할 수 없습니다.');
       }
