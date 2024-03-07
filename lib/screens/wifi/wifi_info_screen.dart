@@ -37,8 +37,8 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     focusInputNode.dispose();
+    super.dispose();
   }
 
   Future _checkCurrentWifi() async {

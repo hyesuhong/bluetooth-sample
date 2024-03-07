@@ -38,10 +38,10 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
   @override
   void dispose() {
-    super.dispose();
-
     _lastValueSubscription.cancel();
     _closeDialog();
+
+    super.dispose();
   }
 
   Future _closeDialog() async {
