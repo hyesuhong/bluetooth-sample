@@ -31,8 +31,11 @@ class Wifi {
       return false;
     }
 
+    final isDecimal = targetGHz % 1 != 0;
+    final additionalNum = isDecimal ? 0.1 : 1;
+
     final minHertz = targetGHz * 1000;
-    final maxHertz = (targetGHz + 1) * 1000 - 1;
+    final maxHertz = (targetGHz + additionalNum) * 1000 - 1;
     return minHertz <= frequency && frequency <= maxHertz;
   }
 
