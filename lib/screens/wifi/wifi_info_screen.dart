@@ -1,5 +1,6 @@
 import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
 import 'package:bluetooth_sample/services/wifi.dart';
+import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -47,29 +48,54 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     bool hasPassword = _hasPassword;
     bool mustReset = false;
 
-    if (isEnabled) {
-      ssid = await Wifi.getCurrentWifiSSID();
+    try {
+      if (isEnabled) {
+        final frequency = await Wifi.getFrequency();
+        final is2_4GHz =
+            frequency != null && Wifi.isValidFrequency(2.4, frequency);
 
-      if (ssid.isEmpty) {
+        if (!is2_4GHz) {
+          throw Exception(
+            'IoT 기기는 2.4GHz의 와이파이만 사용할 수 있습니다.\n이름 뒤에 [2G] 혹은 [2.4G]가 있는 와이파이를 선택하십시오.',
+          );
+        }
+
+        ssid = await Wifi.getCurrentWifiSSID();
+      } else {
+        ssid = null;
         hasPassword = false;
         mustReset = true;
       }
-    } else {
-      ssid = null;
+    } catch (exception) {
+      SnackBarAction action = SnackBarAction(
+        label: '설정',
+        textColor: Colors.white,
+        onPressed: () {
+          Wifi.setEnabled(true);
+        },
+      );
+
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: exception.toString(),
+        duration: const Duration(seconds: 5),
+        action: action,
+      );
+
       hasPassword = false;
       mustReset = true;
-    }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _wifiEnabled = isEnabled;
+          _wifiSSID = ssid;
+          _hasPassword = hasPassword;
 
-    if (mounted) {
-      setState(() {
-        _wifiEnabled = isEnabled;
-        _wifiSSID = ssid;
-        _hasPassword = hasPassword;
-
-        if (mustReset) {
-          _password = '';
-        }
-      });
+          if (mustReset) {
+            _password = '';
+          }
+        });
+      }
     }
   }
 
