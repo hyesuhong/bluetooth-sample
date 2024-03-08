@@ -9,7 +9,10 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 class DeviceScreen extends StatefulWidget {
   final BluetoothDevice device;
 
-  const DeviceScreen({super.key, required this.device});
+  const DeviceScreen({
+    super.key,
+    required this.device,
+  });
 
   @override
   State<DeviceScreen> createState() => _DeviceScreenState();
@@ -37,21 +40,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       _connectionState = state;
       _services = [];
 
-      if (state == BluetoothConnectionState.connected) {
-        _rssi ??= await widget.device.readRssi();
-      } else if (state == BluetoothConnectionState.disconnected) {
-        if (widget.device.disconnectReason != null) {
-          final int? code = widget.device.disconnectReason!.code;
-          final isSuccess = code != null && code == 0;
-          if (!isSuccess) {
-            final msg = widget.device.disconnectReason!.description;
-            CustomSnackBar.show(
-              status: SnackBarStatus.error,
-              message: msg ?? '기기와 연결이 끊어졌습니다.',
-            );
-          }
-        }
-      }
+      await _updateScreenByBLEConnection(state);
 
       if (mounted) {
         setState(() {});
@@ -71,7 +60,37 @@ class _DeviceScreenState extends State<DeviceScreen> {
     super.dispose();
   }
 
-  Future _onConnectPressed() async {
+  Future<void> _updateScreenByBLEConnection(
+      BluetoothConnectionState state) async {
+    switch (state) {
+      case BluetoothConnectionState.connected:
+        _rssi ??= await widget.device.readRssi();
+        break;
+      case BluetoothConnectionState.disconnected:
+        _displayDisconnectionReason(widget.device.disconnectReason);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _displayDisconnectionReason(DisconnectReason? reason) {
+    if (reason == null) {
+      return;
+    }
+
+    final int? code = reason.code;
+    final isSuccess = code != null && code == 0;
+    if (!isSuccess) {
+      final msg = reason.description;
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: msg ?? '기기와 연결이 끊어졌습니다.',
+      );
+    }
+  }
+
+  Future<void> _onConnectPressed() async {
     setState(() {
       _isConnecting = true;
     });
@@ -95,11 +114,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
   }
 
-  Future _onDisconnectPressed() async {
+  Future<void> _onDisconnectPressed() async {
     await widget.device.disconnect();
   }
 
-  Future _onGetServicesPressed() async {
+  Future<void> _onGetServicesPressed() async {
     if (isConnected) {
       List<BluetoothService> services = await widget.device.discoverServices();
       _services = services;
