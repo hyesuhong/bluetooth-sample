@@ -16,16 +16,18 @@ class Wifi {
     await WiFiForIoTPlugin.setEnabled(state, shouldOpenSettings: true);
   }
 
+  static bool _isPositiveNum(num value) {
+    return value.isFinite && !value.isNegative && !value.isNaN;
+  }
+
   static Future<int?> getFrequency() async {
     final frequency = await WiFiForIoTPlugin.getFrequency();
     return frequency;
   }
 
   static bool isValidFrequency(double targetGHz, int frequency) {
-    final isValidGHz =
-        targetGHz.isFinite && !targetGHz.isNegative && !targetGHz.isNaN;
-    final isValidValue =
-        frequency.isFinite && !frequency.isNegative && !frequency.isNaN;
+    final isValidGHz = _isPositiveNum(targetGHz);
+    final isValidValue = _isPositiveNum(frequency);
 
     if (!isValidGHz || !isValidValue) {
       return false;
