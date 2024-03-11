@@ -6,8 +6,6 @@ import 'package:bluetooth_sample/widgets/scan_device_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-final List<int> dummyList = List.filled(10, 0);
-
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
 
@@ -19,7 +17,6 @@ class _ScanScreenState extends State<ScanScreen> {
   List<ScanResult> _scanResults = [];
 
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
-  late StreamSubscription<bool> _isScanningSubscription;
 
   @override
   void initState() {
@@ -36,29 +33,16 @@ class _ScanScreenState extends State<ScanScreen> {
         message: error.toString(),
       );
     });
-
-    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
-      if (mounted) {
-        setState(() {});
-      }
-    }, onError: (error) {
-      CustomSnackBar.show(
-        status: SnackBarStatus.error,
-        message: error.toString(),
-      );
-    });
   }
 
   @override
   void dispose() {
     _scanResultsSubscription.cancel();
-    _isScanningSubscription.cancel();
 
     super.dispose();
   }
 
   Future onScanPressed() async {
-    // _scanResults = [];
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     } catch (error) {
@@ -66,10 +50,6 @@ class _ScanScreenState extends State<ScanScreen> {
         status: SnackBarStatus.error,
         message: error.toString(),
       );
-    }
-
-    if (mounted) {
-      setState(() {});
     }
   }
 
