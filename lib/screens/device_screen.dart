@@ -5,6 +5,7 @@ import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DeviceScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -85,7 +86,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
       final msg = reason.description;
       CustomSnackBar.show(
         status: SnackBarStatus.error,
-        message: msg ?? '기기와 연결이 끊어졌습니다.',
+        message:
+            msg ?? AppLocalizations.of(context)?.alertDisconnectedDevice ?? '',
       );
     }
   }
@@ -98,10 +100,14 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       await widget.device.connect();
 
-      CustomSnackBar.show(
-        status: SnackBarStatus.success,
-        message: '${widget.device.advName} 에 연결되었습니다.',
-      );
+      if (context.mounted) {
+        CustomSnackBar.show(
+          status: SnackBarStatus.success,
+          message: AppLocalizations.of(context)
+                  ?.alertConnectedDevice(widget.device.advName) ??
+              '',
+        );
+      }
     } catch (error) {
       CustomSnackBar.show(
         status: SnackBarStatus.error,
@@ -130,24 +136,25 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Widget _buildActionButton() {
+    final buttonText = _isConnecting
+        ? AppLocalizations.of(context)?.connecting
+        : isConnected
+            ? AppLocalizations.of(context)?.disconnect
+            : AppLocalizations.of(context)?.connect;
     return TextButton(
       onPressed: _isConnecting
           ? null
           : isConnected
               ? _onDisconnectPressed
               : _onConnectPressed,
-      child: Text(_isConnecting
-          ? '연결중..'
-          : isConnected
-              ? '연결 끊기'
-              : '연결'),
+      child: Text(buttonText ?? ''),
     );
   }
 
   Widget _buildGetServicesButton() {
     return FilledButton(
       onPressed: isConnected ? _onGetServicesPressed : null,
-      child: const Text('Services 가져오기'),
+      child: Text(AppLocalizations.of(context)?.getServices ?? ''),
     );
   }
 
@@ -192,7 +199,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     ),
                   ),
                   Expanded(
-                    child: Text('기기 연결 상태: ${_connectionState.name}.'),
+                    child: Text(
+                      AppLocalizations.of(context)
+                              ?.deviceConnectionStatus(_connectionState.name) ??
+                          '',
+                    ),
                   ),
                   _buildGetServicesButton(),
                 ],

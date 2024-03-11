@@ -3,6 +3,7 @@ import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WifiInfoScreen extends StatefulWidget {
   final BluetoothCharacteristic characteristic;
@@ -49,23 +50,45 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     bool mustReset = false;
 
     try {
-      if (isEnabled) {
-        final frequency = await Wifi.getFrequency();
-        final is2_4GHz =
-            frequency != null && Wifi.isValidFrequency(2.4, frequency);
-
-        if (!is2_4GHz) {
-          throw Exception(
-            'IoT 기기는 2.4GHz의 와이파이만 사용할 수 있습니다.\n이름 뒤에 [2G] 혹은 [2.4G]가 있는 와이파이를 선택하십시오.',
-          );
-        }
-
-        ssid = await Wifi.getCurrentWifiSSID();
-      } else {
+      if (!isEnabled) {
         ssid = null;
         hasPassword = false;
         mustReset = true;
+        return;
       }
+
+      final isPermitted = await Wifi.hasPermission();
+      if (!isPermitted && context.mounted) {
+        throw Exception(AppLocalizations.of(context)?.notPermitted);
+      }
+
+      final isConnected = await Wifi.isConnected();
+      if (!isConnected && context.mounted) {
+        throw Exception(AppLocalizations.of(context)?.noneConnectedWifi);
+      }
+
+      final frequency = await Wifi.getFrequency();
+      final is2_4GHz =
+          frequency != null && Wifi.isValidFrequency(2.4, frequency);
+
+      if (!is2_4GHz && context.mounted) {
+        throw Exception(
+          AppLocalizations.of(context)?.not2_4GHz,
+        );
+      }
+
+      final currentSSID = await Wifi.getCurrentWifiSSID();
+      if (!context.mounted) {
+        return;
+      }
+      if (currentSSID == null) {
+        throw Exception(AppLocalizations.of(context)?.cannotReadSsid);
+      }
+      if (currentSSID == '<unknown ssid>') {
+        throw Exception(AppLocalizations.of(context)?.unknownSsid);
+      }
+
+      ssid = currentSSID;
     } catch (exception) {
       SnackBarAction action = SnackBarAction(
         label: '설정',
@@ -116,7 +139,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
             }
           });
         },
-        title: const Text('비밀번호 사용 여부'),
+        title: Text(AppLocalizations.of(context)?.passwordUsage ?? ''),
       ),
     );
   }
@@ -124,7 +147,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   Widget _buildWifiSetting() {
     return Column(
       children: [
-        const Text('와이파이 전원이 꺼져있습니다. 설정에서 와이파이를 활성화하십시오.'),
+        Text(AppLocalizations.of(context)?.alertTurnOnWifi ?? ''),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -132,13 +155,13 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
               onPressed: () {
                 _checkCurrentWifi();
               },
-              child: const Text('연결 확인'),
+              child: Text(AppLocalizations.of(context)?.checkConnection ?? ''),
             ),
             TextButton(
               onPressed: () {
                 Wifi.setEnabled(true);
               },
-              child: const Text('설정'),
+              child: Text(AppLocalizations.of(context)?.setting ?? ''),
             ),
           ],
         ),
@@ -152,9 +175,9 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
       child: TextField(
         focusNode: focusInputNode,
         obscureText: true,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: '비밀번호',
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          hintText: AppLocalizations.of(context)?.password ?? '',
         ),
         onChanged: (String value) {
           setState(() {
@@ -190,7 +213,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('와이파이 정보'),
+        title: Text(AppLocalizations.of(context)?.wifiInfo ?? ''),
       ),
       body: SafeArea(
         child: Column(
@@ -201,9 +224,9 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      '와이파이 정보를 전달하기 위해 현재 연결된 와이파이를 확인합니다.',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)?.alertConnectWifi ?? '',
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
                       ),
@@ -233,7 +256,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
               padding: const EdgeInsets.all(16),
               child: FilledButton(
                 onPressed: _canPush ? _onPushPressed : null,
-                child: const Text('다음'),
+                child: Text(AppLocalizations.of(context)?.next ?? ''),
               ),
             ),
           ],

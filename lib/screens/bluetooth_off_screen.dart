@@ -2,35 +2,40 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BluetoothOffScreen extends StatelessWidget {
   final BluetoothAdapterState? adapterState;
   const BluetoothOffScreen({super.key, this.adapterState});
 
-  String _convertAdapterStateToKR(BluetoothAdapterState? state) {
+  String _convertAdapterStateToKR(
+    BuildContext context,
+    BluetoothAdapterState? state,
+  ) {
     switch (state) {
       case BluetoothAdapterState.unknown:
-        return '알 수 없음';
+        return AppLocalizations.of(context)?.unknown ?? state.toString();
       case BluetoothAdapterState.unavailable:
-        return '사용 불가능';
+        return AppLocalizations.of(context)?.unavailable ?? state.toString();
       case BluetoothAdapterState.unauthorized:
-        return '권한 없음';
+        return AppLocalizations.of(context)?.unauthorized ?? state.toString();
       case BluetoothAdapterState.turningOn:
-        return '켜는중';
+        return AppLocalizations.of(context)?.turningOn ?? state.toString();
       case BluetoothAdapterState.on:
-        return '켜짐';
+        return AppLocalizations.of(context)?.on ?? state.toString();
       case BluetoothAdapterState.turningOff:
-        return '끄는중';
+        return AppLocalizations.of(context)?.turningOff ?? state.toString();
       case BluetoothAdapterState.off:
-        return '꺼짐';
+        return AppLocalizations.of(context)?.off ?? state.toString();
       default:
-        return '사용할 수 없음';
+        return AppLocalizations.of(context)?.unknown ?? state.toString();
     }
   }
 
   Widget _buildTitle(BuildContext context) {
+    final status = _convertAdapterStateToKR(context, adapterState);
     return Text(
-      '블루투스 어댑터 상태: ${_convertAdapterStateToKR(adapterState)}',
+      AppLocalizations.of(context)?.statusBLE(status) ?? '',
       style: Theme.of(context)
           .primaryTextTheme
           .titleSmall
@@ -48,7 +53,7 @@ class BluetoothOffScreen extends StatelessWidget {
           onPressed: () async {
             await FlutterBluePlus.turnOn();
           },
-          child: const Text('블루투스 켜기'),
+          child: Text(AppLocalizations.of(context)?.turnOnBLE ?? ''),
         ),
       ],
     );

@@ -5,6 +5,7 @@ import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/wifi_result_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WifiConnectionScreen extends StatefulWidget {
   final String ssid;
@@ -42,7 +43,10 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
         });
       }
     } catch (error) {
-      print(error);
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -85,15 +89,20 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
           child: CircularProgressIndicator(),
         ),
         const SizedBox(height: 16),
-        Text('${widget.ssid} 정보 확인중'),
+        Text(AppLocalizations.of(context)?.checkingWifiSsid(widget.ssid) ??
+            widget.ssid),
       ],
     );
   }
 
   Widget _buildResultWidget(bool isSuccess) {
     final message = isSuccess
-        ? '${widget.ssid} 확인이 완료되었습니다. 기기에 와이파이 정보를 전송하겠습니까?'
-        : '입력하신 ${widget.ssid} 정보가 정확하지 않습니다. 입력 화면으로 돌아갑니다.';
+        ? AppLocalizations.of(context)?.completeCheckingSsid(widget.ssid)
+        : AppLocalizations.of(context)?.errorCheckingSsid(widget.ssid);
+
+    final buttonText = isSuccess
+        ? AppLocalizations.of(context)?.send
+        : AppLocalizations.of(context)?.goBack;
 
     return Column(
       children: [
@@ -102,7 +111,7 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
             width: double.infinity,
             child: WifiResultWidget(
               isSuccess: isSuccess,
-              message: message,
+              message: message ?? '',
             ),
           ),
         ),
@@ -112,7 +121,7 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
           padding: const EdgeInsets.all(16),
           child: FilledButton(
             onPressed: isSuccess ? _onSendPressed : _onPopPressed,
-            child: Text(isSuccess ? '전송' : '뒤로'),
+            child: Text(buttonText ?? ''),
           ),
         )
       ],

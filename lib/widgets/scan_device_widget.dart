@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ScanDeviceWidget extends StatelessWidget {
   final ScanResult result;
@@ -52,7 +53,7 @@ class ScanDeviceWidget extends StatelessWidget {
               Text(result.rssi.toString()),
               FilledButton(
                 onPressed: result.advertisementData.connectable ? onTap : null,
-                child: const Text('연결'),
+                child: Text(AppLocalizations.of(context)?.connect ?? ''),
               ),
             ],
           ),
