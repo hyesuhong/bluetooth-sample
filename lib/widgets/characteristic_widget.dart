@@ -18,7 +18,6 @@ class CharacteristicWidget extends StatefulWidget {
 
 class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   List<int> _value = [];
-  final dialogContextCompleter = Completer<BuildContext>();
 
   late StreamSubscription<List<int>> _lastValueSubscription;
 
@@ -39,19 +38,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   @override
   void dispose() {
     _lastValueSubscription.cancel();
-    _closeDialog();
-
     super.dispose();
-  }
-
-  Future _closeDialog() async {
-    final dialogContext = await dialogContextCompleter.future;
-
-    if (!dialogContext.mounted) {
-      return;
-    }
-
-    Navigator.of(dialogContext).pop();
   }
 
   Future _onReadPressed() async {
