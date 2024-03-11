@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bluetooth_sample/screens/bluetooth_off_screen.dart';
 import 'package:bluetooth_sample/screens/scan_screen.dart';
+import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -60,6 +61,7 @@ class _MyAppState extends State<MyApp> {
 
 class BluetoothAdapterStateObserver extends NavigatorObserver {
   StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
+  StreamSubscription<BluetoothConnectionState>? _connectionStateSubscription;
 
   @override
   void didPush(Route route, Route? previousRoute) {
@@ -72,11 +74,28 @@ class BluetoothAdapterStateObserver extends NavigatorObserver {
         }
       });
     }
+
+    if (route.settings.name != null && route.settings.name!.contains('/wifi')) {
+      final devices = FlutterBluePlus.connectedDevices;
+
+      if (devices.isNotEmpty) {
+        _connectionStateSubscription ??=
+            devices[0].connectionState.listen((state) {
+          if (state == BluetoothConnectionState.disconnected) {
+            Wifi.disconnect();
+            navigator?.popUntil(ModalRoute.withName('/DeviceScreen'));
+          }
+        });
+      }
+    }
   }
 
   @override
   void didPop(Route route, Route? previousRoute) {
     super.didPop(route, previousRoute);
+    _adapterStateSubscription?.cancel();
+    _adapterStateSubscription = null;
+
     _adapterStateSubscription?.cancel();
     _adapterStateSubscription = null;
   }
