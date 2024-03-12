@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:bluetooth_sample/screens/device_screen.dart';
+import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/scan_device_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -86,7 +86,7 @@ class _ScanScreenState extends State<ScanScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(AppLocalizations.of(context)?.searchDevices ?? ''),
+        title: Text(AppL10n.getL10n(context).searchDevices),
       ),
       body: ListView.separated(
         itemCount: _scanResults.length,

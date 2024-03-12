@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BluetoothOffScreen extends StatelessWidget {
   final BluetoothAdapterState? adapterState;
@@ -14,28 +14,28 @@ class BluetoothOffScreen extends StatelessWidget {
   ) {
     switch (state) {
       case BluetoothAdapterState.unknown:
-        return AppLocalizations.of(context)?.unknown ?? state.toString();
+        return AppL10n.getL10n(context).unknown;
       case BluetoothAdapterState.unavailable:
-        return AppLocalizations.of(context)?.unavailable ?? state.toString();
+        return AppL10n.getL10n(context).unavailable;
       case BluetoothAdapterState.unauthorized:
-        return AppLocalizations.of(context)?.unauthorized ?? state.toString();
+        return AppL10n.getL10n(context).unauthorized;
       case BluetoothAdapterState.turningOn:
-        return AppLocalizations.of(context)?.turningOn ?? state.toString();
+        return AppL10n.getL10n(context).turningOn;
       case BluetoothAdapterState.on:
-        return AppLocalizations.of(context)?.on ?? state.toString();
+        return AppL10n.getL10n(context).on;
       case BluetoothAdapterState.turningOff:
-        return AppLocalizations.of(context)?.turningOff ?? state.toString();
+        return AppL10n.getL10n(context).turningOff;
       case BluetoothAdapterState.off:
-        return AppLocalizations.of(context)?.off ?? state.toString();
+        return AppL10n.getL10n(context).off;
       default:
-        return AppLocalizations.of(context)?.unknown ?? state.toString();
+        return AppL10n.getL10n(context).unknown;
     }
   }
 
   Widget _buildTitle(BuildContext context) {
     final status = _convertAdapterStateToKR(context, adapterState);
     return Text(
-      AppLocalizations.of(context)?.statusBLE(status) ?? '',
+      AppL10n.getL10n(context).statusBLE(status),
       style: Theme.of(context)
           .primaryTextTheme
           .titleSmall
@@ -53,7 +53,7 @@ class BluetoothOffScreen extends StatelessWidget {
           onPressed: () async {
             await FlutterBluePlus.turnOn();
           },
-          child: Text(AppLocalizations.of(context)?.turnOnBLE ?? ''),
+          child: Text(AppL10n.getL10n(context).turnOnBLE),
         ),
       ],
     );

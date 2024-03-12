@@ -1,9 +1,9 @@
 import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
 import 'package:bluetooth_sample/services/wifi.dart';
+import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WifiInfoScreen extends StatefulWidget {
   final BluetoothCharacteristic characteristic;
@@ -59,12 +59,12 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
       final isPermitted = await Wifi.hasPermission();
       if (!isPermitted && context.mounted) {
-        throw Exception(AppLocalizations.of(context)?.notPermitted);
+        throw Exception(AppL10n.getL10n(context).notPermitted);
       }
 
       final isConnected = await Wifi.isConnected();
       if (!isConnected && context.mounted) {
-        throw Exception(AppLocalizations.of(context)?.noneConnectedWifi);
+        throw Exception(AppL10n.getL10n(context).noneConnectedWifi);
       }
 
       final frequency = await Wifi.getFrequency();
@@ -73,7 +73,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
       if (!is2_4GHz && context.mounted) {
         throw Exception(
-          AppLocalizations.of(context)?.not2_4GHz,
+          AppL10n.getL10n(context).not2_4GHz,
         );
       }
 
@@ -82,10 +82,10 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
         return;
       }
       if (currentSSID == null) {
-        throw Exception(AppLocalizations.of(context)?.cannotReadSsid);
+        throw Exception(AppL10n.getL10n(context).cannotReadSsid);
       }
       if (currentSSID == '<unknown ssid>') {
-        throw Exception(AppLocalizations.of(context)?.unknownSsid);
+        throw Exception(AppL10n.getL10n(context).unknownSsid);
       }
 
       ssid = currentSSID;
@@ -139,7 +139,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
             }
           });
         },
-        title: Text(AppLocalizations.of(context)?.passwordUsage ?? ''),
+        title: Text(AppL10n.getL10n(context).passwordUsage),
       ),
     );
   }
@@ -147,7 +147,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   Widget _buildWifiSetting() {
     return Column(
       children: [
-        Text(AppLocalizations.of(context)?.alertTurnOnWifi ?? ''),
+        Text(AppL10n.getL10n(context).alertTurnOnWifi),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -155,13 +155,13 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
               onPressed: () {
                 _checkCurrentWifi();
               },
-              child: Text(AppLocalizations.of(context)?.checkConnection ?? ''),
+              child: Text(AppL10n.getL10n(context).checkConnection),
             ),
             TextButton(
               onPressed: () {
                 Wifi.setEnabled(true);
               },
-              child: Text(AppLocalizations.of(context)?.setting ?? ''),
+              child: Text(AppL10n.getL10n(context).setting),
             ),
           ],
         ),
@@ -177,7 +177,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
         obscureText: true,
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
-          hintText: AppLocalizations.of(context)?.password ?? '',
+          hintText: AppL10n.getL10n(context).password,
         ),
         onChanged: (String value) {
           setState(() {
@@ -213,7 +213,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(AppLocalizations.of(context)?.wifiInfo ?? ''),
+        title: Text(AppL10n.getL10n(context).wifiInfo),
       ),
       body: SafeArea(
         child: Column(
@@ -225,7 +225,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.alertConnectWifi ?? '',
+                      AppL10n.getL10n(context).alertConnectWifi,
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
@@ -256,7 +256,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
               padding: const EdgeInsets.all(16),
               child: FilledButton(
                 onPressed: _canPush ? _onPushPressed : null,
-                child: Text(AppLocalizations.of(context)?.next ?? ''),
+                child: Text(AppL10n.getL10n(context).next),
               ),
             ),
           ],

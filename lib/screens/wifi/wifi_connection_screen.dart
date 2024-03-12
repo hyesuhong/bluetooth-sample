@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:bluetooth_sample/services/wifi.dart';
+import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/wifi_result_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WifiConnectionScreen extends StatefulWidget {
   final String ssid;
@@ -89,20 +89,21 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
           child: CircularProgressIndicator(),
         ),
         const SizedBox(height: 16),
-        Text(AppLocalizations.of(context)?.checkingWifiSsid(widget.ssid) ??
-            widget.ssid),
+        Text(
+          AppL10n.getL10n(context).checkingWifiSsid(widget.ssid),
+        ),
       ],
     );
   }
 
   Widget _buildResultWidget(bool isSuccess) {
     final message = isSuccess
-        ? AppLocalizations.of(context)?.completeCheckingSsid(widget.ssid)
-        : AppLocalizations.of(context)?.errorCheckingSsid(widget.ssid);
+        ? AppL10n.getL10n(context).completeCheckingSsid(widget.ssid)
+        : AppL10n.getL10n(context).errorCheckingSsid(widget.ssid);
 
     final buttonText = isSuccess
-        ? AppLocalizations.of(context)?.send
-        : AppLocalizations.of(context)?.goBack;
+        ? AppL10n.getL10n(context).send
+        : AppL10n.getL10n(context).goBack;
 
     return Column(
       children: [
@@ -111,7 +112,7 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
             width: double.infinity,
             child: WifiResultWidget(
               isSuccess: isSuccess,
-              message: message ?? '',
+              message: message,
             ),
           ),
         ),
@@ -121,7 +122,7 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
           padding: const EdgeInsets.all(16),
           child: FilledButton(
             onPressed: isSuccess ? _onSendPressed : _onPopPressed,
-            child: Text(buttonText ?? ''),
+            child: Text(buttonText),
           ),
         )
       ],

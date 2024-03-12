@@ -1,6 +1,6 @@
+import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ScanDeviceWidget extends StatelessWidget {
   final ScanResult result;
@@ -53,7 +53,7 @@ class ScanDeviceWidget extends StatelessWidget {
               Text(result.rssi.toString()),
               FilledButton(
                 onPressed: result.advertisementData.connectable ? onTap : null,
-                child: Text(AppLocalizations.of(context)?.connect ?? ''),
+                child: Text(AppL10n.getL10n(context).connect),
               ),
             ],
           ),
