@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
+import 'package:bluetooth_sample/widgets/bluetooth/device_info.dart';
 import 'package:bluetooth_sample/widgets/bluetooth/service_widget.dart';
 import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:flutter/material.dart';
@@ -151,14 +152,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
 
-  Widget _buildGetServicesButton() {
-    return Button(
-      type: ButtonType.filled,
-      onPressed: isConnected ? _onGetServicesPressed : null,
-      child: Text(AppL10n.getL10n(context).getServices),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,37 +169,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
             children: [
               Text(widget.device.remoteId.str),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Container(
-                    width: 64,
-                    alignment: Alignment.center,
-                    child: Column(
-                      children: [
-                        Icon(
-                          isConnected
-                              ? Icons.bluetooth_connected
-                              : Icons.bluetooth,
-                          color: Colors.grey,
-                        ),
-                        if (_rssi != null)
-                          Text(
-                            '${_rssi.toString()}dBm',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      AppL10n.getL10n(context)
-                          .deviceConnectionStatus(_connectionState.name),
-                    ),
-                  ),
-                  _buildGetServicesButton(),
-                ],
+              DeviceInfo(
+                isConnected: isConnected,
+                connectionState: _connectionState.name,
+                onGetServicesPressed: _onGetServicesPressed,
+                rssi: _rssi,
               ),
               const SizedBox(
                 height: 24,

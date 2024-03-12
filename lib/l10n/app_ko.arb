@@ -67,7 +67,7 @@
   "disconnect": "연결 끊기",
   "connect": "연결",
   "getServices": "Services 가져오기",
-  "deviceConnectionStatus": "기기 연결 상태 {status}",
+  "deviceConnectionStatus": "기기 연결 상태: {status}",
   "@deviceConnectionStatus": {
     "description": "A message with device connection status",
     "placeholders": {
