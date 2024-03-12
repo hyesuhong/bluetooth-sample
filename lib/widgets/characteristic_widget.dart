@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bluetooth_sample/screens/wifi/wifi_info_screen.dart';
+import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:bluetooth_sample/widgets/subtitle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -45,6 +46,14 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
     await widget.characteristic.read();
   }
 
+  Widget _buildReadButton() {
+    return Button(
+      type: ButtonType.text,
+      onPressed: _onReadPressed,
+      child: const Text('Read'),
+    );
+  }
+
   _onWriteWifiPressed() {
     MaterialPageRoute route = MaterialPageRoute(
       builder: (context) => WifiInfoScreen(
@@ -56,7 +65,8 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
   }
 
   Widget _buildWriteButton() {
-    return TextButton(
+    return Button(
+      type: ButtonType.text,
       onPressed: _onWriteWifiPressed,
       child: const Text('Write(wifi)'),
     );
@@ -80,7 +90,8 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
 
   Widget _buildSubscribeButton() {
     bool isNotifying = widget.characteristic.isNotifying;
-    return TextButton(
+    return Button(
+      type: ButtonType.text,
       onPressed: isNotifying ? _onUnsubscribePressed : _onSubscribePressed,
       child: Text(isNotifying ? 'Unsubscribe' : 'Subscribe'),
     );
@@ -137,11 +148,7 @@ class _CharacteristicWidgetState extends State<CharacteristicWidget> {
           ),
           Row(
             children: [
-              if (widget.characteristic.properties.read)
-                TextButton(
-                  onPressed: _onReadPressed,
-                  child: const Text('Read'),
-                ),
+              if (widget.characteristic.properties.read) _buildReadButton(),
               if (widget.characteristic.properties.write) _buildWriteButton(),
               if (widget.characteristic.properties.notify ||
                   widget.characteristic.properties.indicate)

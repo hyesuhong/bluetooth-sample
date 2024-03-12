@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bluetooth_sample/utils/app_l10n.dart';
+import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -49,7 +50,8 @@ class BluetoothOffScreen extends StatelessWidget {
         const SizedBox(
           height: 24,
         ),
-        FilledButton.tonal(
+        Button(
+          type: ButtonType.filledTonal,
           onPressed: () async {
             await FlutterBluePlus.turnOn();
           },

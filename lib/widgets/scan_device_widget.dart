@@ -1,4 +1,5 @@
 import 'package:bluetooth_sample/utils/app_l10n.dart';
+import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -51,7 +52,8 @@ class ScanDeviceWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(result.rssi.toString()),
-              FilledButton(
+              Button(
+                type: ButtonType.filled,
                 onPressed: result.advertisementData.connectable ? onTap : null,
                 child: Text(AppL10n.getL10n(context).connect),
               ),

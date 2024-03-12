@@ -2,6 +2,7 @@ import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
 import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
+import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -151,13 +152,15 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
+            Button(
+              type: ButtonType.text,
               onPressed: () {
                 _checkCurrentWifi();
               },
               child: Text(AppL10n.getL10n(context).checkConnection),
             ),
-            TextButton(
+            Button(
+              type: ButtonType.text,
               onPressed: () {
                 Wifi.setEnabled(true);
               },
@@ -254,7 +257,8 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
               ),
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              child: FilledButton(
+              child: Button(
+                type: ButtonType.filled,
                 onPressed: _canPush ? _onPushPressed : null,
                 child: Text(AppL10n.getL10n(context).next),
               ),
@@ -262,8 +266,8 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
+      floatingActionButton: Button(
+        type: ButtonType.floating,
         onPressed: () {
           _checkCurrentWifi();
         },

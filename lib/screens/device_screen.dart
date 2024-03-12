@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
+import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -139,7 +140,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
         : isConnected
             ? AppL10n.getL10n(context).disconnect
             : AppL10n.getL10n(context).connect;
-    return TextButton(
+    return Button(
+      type: ButtonType.text,
       onPressed: _isConnecting
           ? null
           : isConnected
@@ -150,7 +152,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
   }
 
   Widget _buildGetServicesButton() {
-    return FilledButton(
+    return Button(
+      type: ButtonType.filled,
       onPressed: isConnected ? _onGetServicesPressed : null,
       child: Text(AppL10n.getL10n(context).getServices),
     );

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
+import 'package:bluetooth_sample/widgets/common/button.dart';
 import 'package:bluetooth_sample/widgets/wifi_result_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -120,7 +121,8 @@ class _WifiConnectionScreenState extends State<WifiConnectionScreen> {
           constraints: const BoxConstraints(maxWidth: 400),
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          child: FilledButton(
+          child: Button(
+            type: ButtonType.filled,
             onPressed: isSuccess ? _onSendPressed : _onPopPressed,
             child: Text(buttonText),
           ),
