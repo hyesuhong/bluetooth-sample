@@ -22,6 +22,20 @@ class CustomSnackBar {
     return _snackBarKey;
   }
 
+  static SnackBarAction? _buildSnackBarAction(
+    Color textColor,
+    CustomSnackBarAction? action,
+  ) {
+    if (action == null) {
+      return null;
+    }
+    return SnackBarAction(
+      label: action.label,
+      onPressed: action.onPressed,
+      textColor: textColor,
+    );
+  }
+
   static Color _getBackgroundColor(SnackBarStatus status) {
     Color backgroundColor = Colors.white.withOpacity(0.7);
 
@@ -57,7 +71,7 @@ class CustomSnackBar {
     required SnackBarStatus status,
     required String message,
     Duration duration = const Duration(seconds: 3),
-    SnackBarAction? action,
+    CustomSnackBarAction? action,
   }) {
     Color backgroundColor = _getBackgroundColor(status);
     Color foregroundColor = _getForegroundColor(status);
@@ -68,7 +82,7 @@ class CustomSnackBar {
         style: TextStyle(color: foregroundColor),
       ),
       backgroundColor: backgroundColor,
-      action: action,
+      action: _buildSnackBarAction(foregroundColor, action),
       duration: duration,
     );
 
@@ -78,4 +92,14 @@ class CustomSnackBar {
     scaffoldMessengerKey.currentState?.removeCurrentSnackBar();
     scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
   }
+}
+
+class CustomSnackBarAction {
+  final String label;
+  final VoidCallback onPressed;
+
+  CustomSnackBarAction({
+    required this.label,
+    required this.onPressed,
+  });
 }

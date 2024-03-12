@@ -91,20 +91,19 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
       ssid = currentSSID;
     } catch (exception) {
-      SnackBarAction action = SnackBarAction(
-        label: '설정',
-        textColor: Colors.white,
-        onPressed: () {
-          Wifi.setEnabled(true);
-        },
-      );
-
-      CustomSnackBar.show(
-        status: SnackBarStatus.error,
-        message: exception.toString(),
-        duration: const Duration(seconds: 5),
-        action: action,
-      );
+      if (context.mounted) {
+        CustomSnackBar.show(
+          status: SnackBarStatus.error,
+          message: exception.toString(),
+          duration: const Duration(seconds: 5),
+          action: CustomSnackBarAction(
+            label: AppL10n.getL10n(context).setting,
+            onPressed: () {
+              Wifi.setEnabled(true);
+            },
+          ),
+        );
+      }
 
       hasPassword = false;
       mustReset = true;
