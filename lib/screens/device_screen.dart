@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
+import 'package:bluetooth_sample/widgets/bluetooth/service_widget.dart';
 import 'package:bluetooth_sample/widgets/common/button.dart';
-import 'package:bluetooth_sample/widgets/service_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 

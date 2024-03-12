@@ -1,4 +1,4 @@
-import 'package:bluetooth_sample/widgets/characteristic_widget.dart';
+import 'package:bluetooth_sample/widgets/bluetooth/characteristic_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
