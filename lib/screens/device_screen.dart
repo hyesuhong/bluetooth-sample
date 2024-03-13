@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/bluetooth/device_info.dart';
@@ -70,10 +71,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
         _rssi ??= await widget.device.readRssi();
         break;
       case BluetoothConnectionState.disconnected:
+        await _disposeWifiScreen();
         _displayDisconnectionReason(widget.device.disconnectReason);
         break;
       default:
         break;
+    }
+  }
+
+  Future _disposeWifiScreen() async {
+    final isWifiConnected = await Wifi.isConnected();
+    if (isWifiConnected) {
+      await Wifi.disconnect();
+    }
+
+    if (context.mounted) {
+      Navigator.popUntil(context, ModalRoute.withName('/DeviceScreen'));
     }
   }
 
