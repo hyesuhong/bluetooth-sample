@@ -6,27 +6,24 @@ import 'package:wifi_iot/wifi_iot.dart';
 class Wifi {
   Wifi._();
 
-  static Future<bool> isEnabled() async {
-    bool wifiEnabled = await WiFiForIoTPlugin.isEnabled();
-
-    return wifiEnabled;
+  static Future<bool> isEnabled() {
+    return WiFiForIoTPlugin.isEnabled();
   }
 
-  static Future setEnabled(bool state) async {
-    await WiFiForIoTPlugin.setEnabled(state, shouldOpenSettings: true);
+  static void setEnabled(bool state) {
+    WiFiForIoTPlugin.setEnabled(state, shouldOpenSettings: true);
   }
 
-  static Future<bool> isConnected() async {
-    return await WiFiForIoTPlugin.isConnected();
+  static Future<bool> isConnected() {
+    return WiFiForIoTPlugin.isConnected();
   }
 
   static bool _isPositiveNum(num value) {
     return value.isFinite && !value.isNegative && !value.isNaN;
   }
 
-  static Future<int?> getFrequency() async {
-    final frequency = await WiFiForIoTPlugin.getFrequency();
-    return frequency;
+  static Future<int?> getFrequency() {
+    return WiFiForIoTPlugin.getFrequency();
   }
 
   static bool isValidFrequency(double targetGHz, int frequency) {
@@ -72,22 +69,7 @@ class Wifi {
     return status.isGranted || status.isLimited || status.isProvisional;
   }
 
-  static Future<bool> findAndConnect(String ssid, String? password) async {
-    await disconnect();
-
-    final response =
-        await WiFiForIoTPlugin.findAndConnect(ssid, password: password);
-
-    if (response) {
-      await WiFiForIoTPlugin.forceWifiUsage(true);
-    }
-
-    return response;
-  }
-
-  static Future<void> disconnect() async {
-    await WiFiForIoTPlugin.disconnect();
-
-    await WiFiForIoTPlugin.forceWifiUsage(false);
+  static Future<bool> findAndConnect(String ssid, String? password) {
+    return WiFiForIoTPlugin.findAndConnect(ssid, password: password);
   }
 }
