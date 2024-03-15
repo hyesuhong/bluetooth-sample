@@ -7,10 +7,6 @@ import 'package:wifi_iot/wifi_iot.dart';
 class Wifi {
   Wifi._();
 
-  // TODO: connection 체크하는 Stream도 만들기
-  // state: notPermitted, connect, disconnect, connecting(<unknown ssid>)
-  // return => ConnectionState state & String? ssid
-
   static Stream<bool> enabledState() {
     final controller = StreamController<bool>();
     const duration = Duration(seconds: 1);
@@ -52,6 +48,57 @@ class Wifi {
     controller.onCancel = onCancel;
     controller.onResume = onResume;
     controller.onPause = onPause;
+
+    return controller.stream;
+  }
+
+  // TODO: connection 체크하는 Stream도 만들기
+  // state: notPermitted, connect, disconnect, connecting(<unknown ssid>)
+  // return => ConnectionState state & String? ssid
+
+  static Stream<WifiConnection> connectionState() {
+    final controller = StreamController<WifiConnection>();
+    const duration = Duration(seconds: 1);
+    Timer? timer;
+    bool? lastValue;
+
+    void getConnectionState(Timer timer) async {
+      final isPermitted = await hasPermission();
+      if (!isPermitted) {
+        const connection =
+            WifiConnection(state: WifiConnectionState.unauthorized);
+        controller.add(connection);
+        return;
+      }
+
+      final isConnectedState = await isConnected();
+      if (!isConnectedState) {
+        const connection =
+            WifiConnection(state: WifiConnectionState.disconnected);
+        controller.add(connection);
+        return;
+      }
+
+      final currentSSID = await Wifi.getCurrentWifiSSID();
+      if (currentSSID == null) {
+        const connection = WifiConnection(state: WifiConnectionState.unknown);
+        controller.add(connection);
+        return;
+      }
+
+      if (currentSSID == '<unknown ssid>') {
+        const connection =
+            WifiConnection(state: WifiConnectionState.connecting);
+        controller.add(connection);
+        return;
+      }
+
+      controller.add(WifiConnection(
+        state: WifiConnectionState.connected,
+        ssid: currentSSID,
+      ));
+      return;
+    }
 
     return controller.stream;
   }
@@ -122,4 +169,19 @@ class Wifi {
   static Future<bool> findAndConnect(String ssid, String? password) {
     return WiFiForIoTPlugin.findAndConnect(ssid, password: password);
   }
+}
+
+enum WifiConnectionState {
+  unauthorized,
+  connected,
+  disconnected,
+  connecting,
+  unknown,
+}
+
+class WifiConnection {
+  final WifiConnectionState state;
+  final String? ssid;
+
+  const WifiConnection({required this.state, this.ssid});
 }

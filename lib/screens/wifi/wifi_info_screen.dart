@@ -46,7 +46,9 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
       if (state) {
         _checkCurrentWifi();
+        return;
       }
+      _resetWifiInfo();
     }, onError: (error) {
       CustomSnackBar.show(
         status: SnackBarStatus.error,
@@ -61,6 +63,14 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     _wifiEnabledStateSubscription.cancel();
 
     super.dispose();
+  }
+
+  void _resetWifiInfo() {
+    setState(() {
+      _wifiSSID = null;
+      _hasPassword = false;
+      _password = '';
+    });
   }
 
   Future _checkCurrentWifi() async {
