@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:permission_handler/permission_handler.dart';
@@ -5,6 +6,55 @@ import 'package:wifi_iot/wifi_iot.dart';
 
 class Wifi {
   Wifi._();
+
+  // TODO: connection 체크하는 Stream도 만들기
+  // state: notPermitted, connect, disconnect, connecting(<unknown ssid>)
+  // return => ConnectionState state & String? ssid
+
+  static Stream<bool> enabledState() {
+    final controller = StreamController<bool>();
+    const duration = Duration(seconds: 1);
+    Timer? timer;
+    bool? lastValue;
+
+    void getEnabledState(Timer timer) async {
+      try {
+        final enableState = await isEnabled();
+
+        if (lastValue != enableState) {
+          lastValue = enableState;
+          controller.add(enableState);
+          return;
+        }
+      } catch (error) {
+        controller.close();
+      }
+    }
+
+    void onListen() {
+      timer ??= Timer.periodic(duration, getEnabledState);
+    }
+
+    void onResume() {
+      // print('resume enabledState stream');
+    }
+
+    void onCancel() {
+      timer?.cancel();
+      timer = null;
+    }
+
+    void onPause() {
+      timer?.cancel();
+    }
+
+    controller.onListen = onListen;
+    controller.onCancel = onCancel;
+    controller.onResume = onResume;
+    controller.onPause = onPause;
+
+    return controller.stream;
+  }
 
   static Future<bool> isEnabled() {
     return WiFiForIoTPlugin.isEnabled();

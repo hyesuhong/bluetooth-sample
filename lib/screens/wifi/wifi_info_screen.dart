@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bluetooth_sample/screens/wifi/wifi_connection_screen.dart';
 import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/app_l10n.dart';
@@ -25,6 +27,8 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
   FocusNode focusInputNode = FocusNode();
 
+  late StreamSubscription<bool> _wifiEnabledStateSubscription;
+
   bool get _canPush =>
       _wifiSSID != null &&
       (!_hasPassword || (_hasPassword && _password.isNotEmpty));
@@ -33,31 +37,38 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   void initState() {
     super.initState();
 
-    if (mounted) {
-      _checkCurrentWifi();
-    }
+    _wifiEnabledStateSubscription = Wifi.enabledState().listen((state) {
+      if (mounted) {
+        setState(() {
+          _wifiEnabled = state;
+        });
+      }
+
+      if (state) {
+        _checkCurrentWifi();
+      }
+    }, onError: (error) {
+      CustomSnackBar.show(
+        status: SnackBarStatus.error,
+        message: error.toString(),
+      );
+    });
   }
 
   @override
   void dispose() {
     focusInputNode.dispose();
+    _wifiEnabledStateSubscription.cancel();
+
     super.dispose();
   }
 
   Future _checkCurrentWifi() async {
-    bool isEnabled = await Wifi.isEnabled();
     String? ssid;
     bool hasPassword = _hasPassword;
     bool mustReset = false;
 
     try {
-      if (!isEnabled) {
-        ssid = null;
-        hasPassword = false;
-        mustReset = true;
-        return;
-      }
-
       final isPermitted = await Wifi.hasPermission();
       if (!isPermitted && context.mounted) {
         throw Exception(AppL10n.getL10n(context).notPermitted);
@@ -110,7 +121,6 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     } finally {
       if (mounted) {
         setState(() {
-          _wifiEnabled = isEnabled;
           _wifiSSID = ssid;
           _hasPassword = hasPassword;
 
@@ -141,33 +151,6 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
         },
         title: Text(AppL10n.getL10n(context).passwordUsage),
       ),
-    );
-  }
-
-  Widget _buildWifiSetting() {
-    return Column(
-      children: [
-        Text(AppL10n.getL10n(context).alertTurnOnWifi),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Button(
-              type: ButtonType.text,
-              onPressed: () {
-                _checkCurrentWifi();
-              },
-              child: Text(AppL10n.getL10n(context).checkConnection),
-            ),
-            Button(
-              type: ButtonType.text,
-              onPressed: () {
-                Wifi.setEnabled(true);
-              },
-              child: Text(AppL10n.getL10n(context).setting),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -244,7 +227,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
                     const SizedBox(height: 16),
                     if (_wifiSSID != null) Text(_wifiSSID!),
                     const SizedBox(height: 40),
-                    _wifiEnabled ? _buildCheckPassword() : _buildWifiSetting(),
+                    if (_wifiSSID != null) _buildCheckPassword(),
                     if (_hasPassword) _buildPasswordInput(),
                   ],
                 ),
@@ -264,13 +247,6 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: Button(
-        type: ButtonType.floating,
-        onPressed: () {
-          _checkCurrentWifi();
-        },
-        child: const Icon(Icons.refresh),
       ),
     );
   }
