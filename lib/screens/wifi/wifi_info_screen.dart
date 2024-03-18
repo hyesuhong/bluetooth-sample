@@ -27,15 +27,18 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   WifiConnection _connectionState = const WifiConnection(
     state: WifiConnectionState.unknown,
   );
-  bool _available = false;
+  bool _is2_4GHz = false;
 
   FocusNode focusInputNode = FocusNode();
 
   late StreamSubscription<bool> _wifiEnabledStateSubscription;
   StreamSubscription<WifiConnection>? _wifiConnectionSubscription;
 
+  bool get _canUsePassword =>
+      _connectionState.state == WifiConnectionState.connected && _is2_4GHz;
+
   bool get _canPush =>
-      _connectionState.state == WifiConnectionState.connected &&
+      _canUsePassword &&
       (!_hasPassword || (_hasPassword && _password.isNotEmpty));
 
   @override
@@ -88,6 +91,7 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
       _connectionState = const WifiConnection(
         state: WifiConnectionState.unknown,
       );
+      _is2_4GHz = false;
     });
   }
 
@@ -99,18 +103,18 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   }
 
   _checkCurrentWifi(WifiConnection state) async {
-    bool available = false;
+    bool is2_4GHz = false;
 
     if (state.state != WifiConnectionState.connected) {
       _resetWifiInfo();
       return;
     }
 
-    available = await _checkWifiFrequency();
+    is2_4GHz = await _checkWifiFrequency();
 
     setState(() {
       _connectionState = state;
-      _available = available;
+      _is2_4GHz = is2_4GHz;
     });
   }
 
@@ -191,14 +195,15 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
                 child: WifiInfoWidget(
                   enabled: _wifiEnabled,
                   state: _connectionState,
-                  hasWarning: _available,
                   warningText:
-                      _available ? null : AppL10n.getL10n(context).not2_4GHz,
+                      _connectionState.state == WifiConnectionState.connected &&
+                              !_is2_4GHz
+                          ? AppL10n.getL10n(context).not2_4GHz
+                          : null,
                   children: [
                     const SizedBox(height: 40),
-                    if (_connectionState.state == WifiConnectionState.connected)
-                      _buildCheckPassword(),
-                    if (_hasPassword) _buildPasswordInput(),
+                    if (_canUsePassword) _buildCheckPassword(),
+                    if (_canUsePassword && _hasPassword) _buildPasswordInput(),
                   ],
                 ),
               ),

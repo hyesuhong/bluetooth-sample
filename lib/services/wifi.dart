@@ -55,7 +55,8 @@ abstract class Wifi {
     final controller = StreamController<WifiConnection>();
     const duration = Duration(seconds: 1);
     Timer? timer;
-    WifiConnectionState lastValue = WifiConnectionState.unknown;
+    WifiConnection lastValue =
+        const WifiConnection(state: WifiConnectionState.unknown);
 
     void getConnectionState(Timer timer) async {
       final isPermitted = await hasPermission();
@@ -63,8 +64,8 @@ abstract class Wifi {
         const connection =
             WifiConnection(state: WifiConnectionState.unauthorized);
 
-        if (lastValue != WifiConnectionState.unauthorized) {
-          lastValue = WifiConnectionState.unauthorized;
+        if (lastValue.state != connection.state) {
+          lastValue = connection;
           controller.add(connection);
         }
         return;
@@ -75,8 +76,8 @@ abstract class Wifi {
         const connection =
             WifiConnection(state: WifiConnectionState.disconnected);
 
-        if (lastValue != WifiConnectionState.disconnected) {
-          lastValue = WifiConnectionState.disconnected;
+        if (lastValue.state != connection.state) {
+          lastValue = connection;
           controller.add(connection);
         }
         return;
@@ -86,8 +87,8 @@ abstract class Wifi {
       if (currentSSID == null) {
         const connection = WifiConnection(state: WifiConnectionState.unknown);
 
-        if (lastValue != WifiConnectionState.unknown) {
-          lastValue = WifiConnectionState.unknown;
+        if (lastValue.state != connection.state) {
+          lastValue = connection;
           controller.add(connection);
         }
         return;
@@ -97,19 +98,22 @@ abstract class Wifi {
         const connection =
             WifiConnection(state: WifiConnectionState.connecting);
 
-        if (lastValue != WifiConnectionState.connecting) {
-          lastValue = WifiConnectionState.connecting;
+        if (lastValue.state != connection.state) {
+          lastValue = connection;
           controller.add(connection);
         }
         return;
       }
 
-      if (lastValue != WifiConnectionState.connected) {
-        lastValue = WifiConnectionState.connected;
-        controller.add(WifiConnection(
-          state: WifiConnectionState.connected,
-          ssid: currentSSID,
-        ));
+      final connection = WifiConnection(
+        state: WifiConnectionState.connected,
+        ssid: currentSSID,
+      );
+
+      if (lastValue.state != connection.state ||
+          lastValue.ssid != connection.ssid) {
+        lastValue = connection;
+        controller.add(connection);
         return;
       }
     }

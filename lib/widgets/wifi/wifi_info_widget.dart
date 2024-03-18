@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 class WifiInfoWidget extends StatelessWidget {
   final WifiConnection state;
   final bool enabled;
-  final bool hasWarning;
   final String? warningText;
   final List<Widget>? children;
 
@@ -13,7 +12,6 @@ class WifiInfoWidget extends StatelessWidget {
     super.key,
     required this.state,
     required this.enabled,
-    required this.hasWarning,
     this.warningText,
     this.children,
   });
@@ -34,12 +32,14 @@ class WifiInfoWidget extends StatelessWidget {
         Icon(
           enabled ? Icons.wifi : Icons.wifi_off,
           size: 64,
-          color: Colors.grey,
+          color: warningText == null && state.ssid != null
+              ? Colors.green
+              : Colors.grey,
         ),
         const SizedBox(height: 16),
         Text(state.state.name),
         if (warningText != null) Text(warningText!),
-        if (state.ssid != null) Text(state.ssid!),
+        if (warningText == null && state.ssid != null) Text(state.ssid!),
         if (children != null) ...children!,
       ],
     );
