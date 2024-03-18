@@ -27,6 +27,10 @@ class WifiInfoWidget extends StatelessWidget {
         return AppL10n.getL10n(context).connecting;
       case WifiConnectionState.connected:
         return AppL10n.getL10n(context).connected;
+      case WifiConnectionState.on:
+        return AppL10n.getL10n(context).on;
+      case WifiConnectionState.off:
+        return AppL10n.getL10n(context).off;
       case WifiConnectionState.unknown:
       default:
         return AppL10n.getL10n(context).unknown;

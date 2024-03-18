@@ -49,6 +49,9 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
       if (mounted) {
         setState(() {
           _wifiEnabled = state;
+          _connectionState = WifiConnection(
+            state: state ? WifiConnectionState.on : WifiConnectionState.off,
+          );
         });
       }
 
@@ -88,9 +91,6 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     setState(() {
       _hasPassword = false;
       _password = '';
-      _connectionState = const WifiConnection(
-        state: WifiConnectionState.unknown,
-      );
       _is2_4GHz = false;
     });
   }
@@ -105,6 +105,10 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   _checkCurrentWifi(WifiConnection state) async {
     bool is2_4GHz = false;
 
+    setState(() {
+      _connectionState = state;
+    });
+
     if (state.state != WifiConnectionState.connected) {
       _resetWifiInfo();
       return;
@@ -112,8 +116,11 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
 
     is2_4GHz = await _checkWifiFrequency();
 
+    if (is2_4GHz) {
+      _wifiConnectionSubscription?.pause();
+    }
+
     setState(() {
-      _connectionState = state;
       _is2_4GHz = is2_4GHz;
     });
   }

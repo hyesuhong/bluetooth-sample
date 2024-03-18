@@ -222,6 +222,8 @@ enum WifiConnectionState {
   disconnected,
   connecting,
   unknown,
+  on,
+  off,
 }
 
 class WifiConnection {
