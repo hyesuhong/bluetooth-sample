@@ -16,6 +16,23 @@ class WifiInfoWidget extends StatelessWidget {
     this.children,
   });
 
+  String _convertConnectionStateToKR(
+      BuildContext context, WifiConnectionState state) {
+    switch (state) {
+      case WifiConnectionState.unauthorized:
+        return AppL10n.getL10n(context).unauthorized;
+      case WifiConnectionState.disconnected:
+        return AppL10n.getL10n(context).disconnected;
+      case WifiConnectionState.connecting:
+        return AppL10n.getL10n(context).connecting;
+      case WifiConnectionState.connected:
+        return AppL10n.getL10n(context).connected;
+      case WifiConnectionState.unknown:
+      default:
+        return AppL10n.getL10n(context).unknown;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +54,11 @@ class WifiInfoWidget extends StatelessWidget {
               : Colors.grey,
         ),
         const SizedBox(height: 16),
-        Text(state.state.name),
+        Text(
+          AppL10n.getL10n(context).wifiConnectionState(
+            _convertConnectionStateToKR(context, state.state),
+          ),
+        ),
         if (warningText != null) Text(warningText!),
         if (warningText == null && state.ssid != null) Text(state.ssid!),
         if (children != null) ...children!,
