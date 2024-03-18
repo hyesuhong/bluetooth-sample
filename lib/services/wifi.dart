@@ -4,10 +4,14 @@ import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
-class Wifi {
+abstract class Wifi {
+  static const String _unknownSSID = '<unknown ssid>';
   Wifi._();
 
-  static Stream<bool> enabledState() {
+  static Stream<bool> get enabledState => _enabledState();
+  static Stream<WifiConnection> get connectionState => _connectionState();
+
+  static Stream<bool> _enabledState() {
     final controller = StreamController<bool>();
     const duration = Duration(seconds: 1);
     Timer? timer;
@@ -23,6 +27,7 @@ class Wifi {
           return;
         }
       } catch (error) {
+        controller.addError(error);
         controller.close();
       }
     }
@@ -31,43 +36,37 @@ class Wifi {
       timer ??= Timer.periodic(duration, getEnabledState);
     }
 
-    void onResume() {
-      // print('resume enabledState stream');
-    }
-
     void onCancel() {
       timer?.cancel();
       timer = null;
-    }
 
-    void onPause() {
-      timer?.cancel();
+      if (!controller.isClosed) {
+        controller.close();
+      }
     }
 
     controller.onListen = onListen;
     controller.onCancel = onCancel;
-    controller.onResume = onResume;
-    controller.onPause = onPause;
 
     return controller.stream;
   }
 
-  // TODO: connection 체크하는 Stream도 만들기
-  // state: notPermitted, connect, disconnect, connecting(<unknown ssid>)
-  // return => ConnectionState state & String? ssid
-
-  static Stream<WifiConnection> connectionState() {
+  static Stream<WifiConnection> _connectionState() {
     final controller = StreamController<WifiConnection>();
     const duration = Duration(seconds: 1);
     Timer? timer;
-    bool? lastValue;
+    WifiConnectionState lastValue = WifiConnectionState.unknown;
 
     void getConnectionState(Timer timer) async {
       final isPermitted = await hasPermission();
       if (!isPermitted) {
         const connection =
             WifiConnection(state: WifiConnectionState.unauthorized);
-        controller.add(connection);
+
+        if (lastValue != WifiConnectionState.unauthorized) {
+          lastValue = WifiConnectionState.unauthorized;
+          controller.add(connection);
+        }
         return;
       }
 
@@ -75,30 +74,72 @@ class Wifi {
       if (!isConnectedState) {
         const connection =
             WifiConnection(state: WifiConnectionState.disconnected);
-        controller.add(connection);
+
+        if (lastValue != WifiConnectionState.disconnected) {
+          lastValue = WifiConnectionState.disconnected;
+          controller.add(connection);
+        }
         return;
       }
 
       final currentSSID = await Wifi.getCurrentWifiSSID();
       if (currentSSID == null) {
         const connection = WifiConnection(state: WifiConnectionState.unknown);
-        controller.add(connection);
+
+        if (lastValue != WifiConnectionState.unknown) {
+          lastValue = WifiConnectionState.unknown;
+          controller.add(connection);
+        }
         return;
       }
 
-      if (currentSSID == '<unknown ssid>') {
+      if (currentSSID == _unknownSSID) {
         const connection =
             WifiConnection(state: WifiConnectionState.connecting);
-        controller.add(connection);
+
+        if (lastValue != WifiConnectionState.connecting) {
+          lastValue = WifiConnectionState.connecting;
+          controller.add(connection);
+        }
         return;
       }
 
-      controller.add(WifiConnection(
-        state: WifiConnectionState.connected,
-        ssid: currentSSID,
-      ));
-      return;
+      if (lastValue != WifiConnectionState.connected) {
+        lastValue = WifiConnectionState.connected;
+        controller.add(WifiConnection(
+          state: WifiConnectionState.connected,
+          ssid: currentSSID,
+        ));
+        return;
+      }
     }
+
+    void onListen() {
+      timer ??= Timer.periodic(duration, getConnectionState);
+    }
+
+    void onCancel() {
+      timer?.cancel();
+      timer = null;
+
+      if (!controller.isClosed) {
+        controller.close();
+      }
+    }
+
+    void onResume() {
+      timer ??= Timer.periodic(duration, getConnectionState);
+    }
+
+    void onPause() {
+      timer?.cancel();
+      timer = null;
+    }
+
+    controller.onListen = onListen;
+    controller.onCancel = onCancel;
+    controller.onResume = onResume;
+    controller.onPause = onPause;
 
     return controller.stream;
   }
@@ -184,4 +225,9 @@ class WifiConnection {
   final String? ssid;
 
   const WifiConnection({required this.state, this.ssid});
+
+  @override
+  String toString() {
+    return 'WifiConnection: state - ${state.name} | ssid - $ssid';
+  }
 }

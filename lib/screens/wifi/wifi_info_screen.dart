@@ -5,6 +5,7 @@ import 'package:bluetooth_sample/services/wifi.dart';
 import 'package:bluetooth_sample/utils/app_l10n.dart';
 import 'package:bluetooth_sample/utils/custom_snack_bar.dart';
 import 'package:bluetooth_sample/widgets/common/button.dart';
+import 'package:bluetooth_sample/widgets/wifi/wifi_info_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -23,21 +24,25 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   bool _wifiEnabled = false;
   bool _hasPassword = false;
   String _password = '';
-  String? _wifiSSID;
+  WifiConnection _connectionState = const WifiConnection(
+    state: WifiConnectionState.unknown,
+  );
+  bool _available = false;
 
   FocusNode focusInputNode = FocusNode();
 
   late StreamSubscription<bool> _wifiEnabledStateSubscription;
+  StreamSubscription<WifiConnection>? _wifiConnectionSubscription;
 
   bool get _canPush =>
-      _wifiSSID != null &&
+      _connectionState.state == WifiConnectionState.connected &&
       (!_hasPassword || (_hasPassword && _password.isNotEmpty));
 
   @override
   void initState() {
     super.initState();
 
-    _wifiEnabledStateSubscription = Wifi.enabledState().listen((state) {
+    _wifiEnabledStateSubscription = Wifi.enabledState.listen((state) {
       if (mounted) {
         setState(() {
           _wifiEnabled = state;
@@ -45,9 +50,19 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
       }
 
       if (state) {
-        _checkCurrentWifi();
+        if (_wifiConnectionSubscription == null ||
+            !_wifiConnectionSubscription!.isPaused) {
+          _wifiConnectionSubscription ??=
+              Wifi.connectionState.listen(_checkCurrentWifi);
+          return;
+        }
+
+        _wifiConnectionSubscription?.resume();
         return;
       }
+
+      _wifiConnectionSubscription?.pause();
+
       _resetWifiInfo();
     }, onError: (error) {
       CustomSnackBar.show(
@@ -61,85 +76,42 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   void dispose() {
     focusInputNode.dispose();
     _wifiEnabledStateSubscription.cancel();
+    _wifiConnectionSubscription?.cancel();
 
     super.dispose();
   }
 
   void _resetWifiInfo() {
     setState(() {
-      _wifiSSID = null;
       _hasPassword = false;
       _password = '';
+      _connectionState = const WifiConnection(
+        state: WifiConnectionState.unknown,
+      );
     });
   }
 
-  Future _checkCurrentWifi() async {
-    String? ssid;
-    bool hasPassword = _hasPassword;
-    bool mustReset = false;
+  Future<bool> _checkWifiFrequency() async {
+    final frequency = await Wifi.getFrequency();
+    final is2_4GHz = frequency != null && Wifi.isValidFrequency(2.4, frequency);
 
-    try {
-      final isPermitted = await Wifi.hasPermission();
-      if (!isPermitted && context.mounted) {
-        throw Exception(AppL10n.getL10n(context).notPermitted);
-      }
+    return is2_4GHz;
+  }
 
-      final isConnected = await Wifi.isConnected();
-      if (!isConnected && context.mounted) {
-        throw Exception(AppL10n.getL10n(context).noneConnectedWifi);
-      }
+  _checkCurrentWifi(WifiConnection state) async {
+    bool available = false;
 
-      final frequency = await Wifi.getFrequency();
-      final is2_4GHz =
-          frequency != null && Wifi.isValidFrequency(2.4, frequency);
-
-      if (!is2_4GHz && context.mounted) {
-        throw Exception(
-          AppL10n.getL10n(context).not2_4GHz,
-        );
-      }
-
-      final currentSSID = await Wifi.getCurrentWifiSSID();
-      if (!context.mounted) {
-        return;
-      }
-      if (currentSSID == null) {
-        throw Exception(AppL10n.getL10n(context).cannotReadSsid);
-      }
-      if (currentSSID == '<unknown ssid>') {
-        throw Exception(AppL10n.getL10n(context).unknownSsid);
-      }
-
-      ssid = currentSSID;
-    } catch (exception) {
-      if (context.mounted) {
-        CustomSnackBar.show(
-          status: SnackBarStatus.error,
-          message: exception.toString(),
-          duration: const Duration(seconds: 5),
-          action: CustomSnackBarAction(
-            label: AppL10n.getL10n(context).setting,
-            onPressed: () {
-              Wifi.setEnabled(true);
-            },
-          ),
-        );
-      }
-
-      hasPassword = false;
-      mustReset = true;
-    } finally {
-      if (mounted) {
-        setState(() {
-          _wifiSSID = ssid;
-          _hasPassword = hasPassword;
-
-          if (mustReset) {
-            _password = '';
-          }
-        });
-      }
+    if (state.state != WifiConnectionState.connected) {
+      _resetWifiInfo();
+      return;
     }
+
+    available = await _checkWifiFrequency();
+
+    setState(() {
+      _connectionState = state;
+      _available = available;
+    });
   }
 
   Widget _buildCheckPassword() {
@@ -184,13 +156,13 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   }
 
   Future _onPushPressed() async {
-    if (_wifiSSID == null) {
+    if (_connectionState.state != WifiConnectionState.connected) {
       return;
     }
 
     MaterialPageRoute route = MaterialPageRoute(
       builder: (context) => WifiConnectionScreen(
-        ssid: _wifiSSID!,
+        ssid: _connectionState.ssid!,
         password: _password,
         characteristic: widget.characteristic,
       ),
@@ -216,28 +188,16 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
             Expanded(
               child: SizedBox(
                 width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: WifiInfoWidget(
+                  enabled: _wifiEnabled,
+                  state: _connectionState,
+                  hasWarning: _available,
+                  warningText:
+                      _available ? null : AppL10n.getL10n(context).not2_4GHz,
                   children: [
-                    Text(
-                      AppL10n.getL10n(context).alertConnectWifi,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    Icon(
-                      _wifiEnabled ? Icons.wifi : Icons.wifi_off,
-                      size: 64,
-                      color: _wifiEnabled ? Colors.green : Colors.red[800],
-                    ),
-                    const SizedBox(height: 16),
-                    if (_wifiSSID != null) Text(_wifiSSID!),
                     const SizedBox(height: 40),
-                    if (_wifiSSID != null) _buildCheckPassword(),
+                    if (_connectionState.state == WifiConnectionState.connected)
+                      _buildCheckPassword(),
                     if (_hasPassword) _buildPasswordInput(),
                   ],
                 ),
