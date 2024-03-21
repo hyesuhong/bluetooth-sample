@@ -103,14 +103,12 @@ class Wifi {
   }
 
   static void _stateStreamOnCancel() {
-    _stateTimer?.cancel();
-    _stateTimer = null;
+    if (!_stateStreamController.hasListener) {
+      _stateTimer?.cancel();
+      _stateTimer = null;
 
-    _lastWifiNetwork = const WifiNetwork(state: WifiNetworkState.unknown);
-    //
-    // if (!_stateStreamController.isClosed) {
-    //   _stateStreamController.close();
-    // }
+      _lastWifiNetwork = const WifiNetwork(state: WifiNetworkState.unknown);
+    }
   }
 
   static Future<bool> isEnabled() {
