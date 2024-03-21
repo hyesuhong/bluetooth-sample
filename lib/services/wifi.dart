@@ -5,141 +5,109 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 class Wifi {
-  static const String _unknownSSID = '<unknown ssid>';
+  static const String _unknownSSID = 'unknown ssid';
   static const _timerDuration = Duration(seconds: 1);
-  static bool? _lastEnabledState;
-  static WifiConnection _lastWifiConnection =
-      const WifiConnection(state: WifiConnectionState.unknown);
+
+  static final StreamController<WifiNetwork> _stateStreamController =
+      StreamController.broadcast(
+    onListen: _stateStreamOnListen,
+    onCancel: _stateStreamOnCancel,
+  );
+  static Timer? _stateTimer;
+  static WifiNetwork _lastWifiNetwork =
+      const WifiNetwork(state: WifiNetworkState.unknown);
+
+  static Stream<WifiNetwork> get currentNetwork => _currentNetwork();
 
   Wifi._();
 
-  static Stream<bool> get enabledState => _enabledState();
-  static Stream<WifiConnection> get connectionState => _connectionState();
-
-  static Stream<bool> _enabledState() {
-    final controller = StreamController<bool>();
-    Timer? timer;
-
-    controller.onListen = () {
-      timer ??= Timer.periodic(_timerDuration, (Timer timer) {
-        _getEnabledState(controller);
-      });
-    };
-    controller.onCancel = () {
-      timer?.cancel();
-      timer = null;
-
-      if (!controller.isClosed) {
-        controller.close();
-      }
-    };
-
-    return controller.stream;
+  static Stream<WifiNetwork> _currentNetwork() {
+    return _stateStreamController.stream;
   }
 
-  static void _getEnabledState(StreamController<bool> controller) async {
+  static void _getWifiNetwork() async {
     try {
       final enableState = await isEnabled();
 
-      if (_lastEnabledState != enableState) {
-        _lastEnabledState = enableState;
-        controller.add(enableState);
+      if (!enableState && _lastWifiNetwork.state != WifiNetworkState.off) {
+        const state = WifiNetwork(state: WifiNetworkState.off);
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+
         return;
       }
-    } catch (error) {
-      controller.addError(error);
-      controller.close();
+
+      if (_lastWifiNetwork.state == WifiNetworkState.off) {
+        const state = WifiNetwork(state: WifiNetworkState.on);
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+      }
+
+      final isPermitted = await hasPermission();
+      if (!isPermitted &&
+          _lastWifiNetwork.state != WifiNetworkState.unauthorized) {
+        const state = WifiNetwork(state: WifiNetworkState.unauthorized);
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+
+        return;
+      }
+
+      final isConnectedState = await isConnected();
+      if (!isConnectedState &&
+          _lastWifiNetwork.state != WifiNetworkState.disconnected) {
+        const state = WifiNetwork(state: WifiNetworkState.disconnected);
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+
+        return;
+      }
+
+      final currentSSID = await Wifi.getCurrentWifiSSID();
+      if (currentSSID == null &&
+          _lastWifiNetwork.state != WifiNetworkState.unknown) {
+        const state = WifiNetwork(state: WifiNetworkState.unknown);
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+
+        return;
+      }
+
+      if (currentSSID!.contains(_unknownSSID) &&
+          _lastWifiNetwork.state != WifiNetworkState.connecting) {
+        const state = WifiNetwork(state: WifiNetworkState.connecting);
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+
+        return;
+      }
+
+      final state =
+          WifiNetwork(state: WifiNetworkState.connected, ssid: currentSSID);
+
+      if (_lastWifiNetwork.state != state.state ||
+          _lastWifiNetwork.ssid != state.ssid) {
+        _lastWifiNetwork = state;
+        _stateStreamController.add(state);
+      }
+    } catch (e) {
+      _stateStreamController.addError(e);
+      _stateStreamController.close();
     }
   }
 
-  static Stream<WifiConnection> _connectionState() {
-    final controller = StreamController<WifiConnection>();
-
-    Timer? timer;
-
-    controller.onListen = () {
-      timer ??= Timer.periodic(_timerDuration, (Timer timer) {
-        _getConnectionState(controller);
-      });
-    };
-    controller.onCancel = () {
-      timer?.cancel();
-      timer = null;
-
-      if (!controller.isClosed) {
-        controller.close();
-      }
-    };
-    controller.onResume = () {
-      timer ??= Timer.periodic(_timerDuration, (Timer timer) {
-        _getConnectionState(controller);
-      });
-    };
-    controller.onPause = () {
-      timer?.cancel();
-      timer = null;
-    };
-
-    return controller.stream;
+  static void _stateStreamOnListen() {
+    _stateTimer ??= Timer.periodic(_timerDuration, (timer) {
+      _getWifiNetwork();
+    });
   }
 
-  static void _getConnectionState(
-      StreamController<WifiConnection> controller) async {
-    final isPermitted = await hasPermission();
-    if (!isPermitted) {
-      const connection =
-          WifiConnection(state: WifiConnectionState.unauthorized);
+  static void _stateStreamOnCancel() {
+    _stateTimer?.cancel();
+    _stateTimer = null;
 
-      if (_lastWifiConnection.state != connection.state) {
-        _lastWifiConnection = connection;
-        controller.add(connection);
-      }
-      return;
-    }
-
-    final isConnectedState = await isConnected();
-    if (!isConnectedState) {
-      const connection =
-          WifiConnection(state: WifiConnectionState.disconnected);
-
-      if (_lastWifiConnection.state != connection.state) {
-        _lastWifiConnection = connection;
-        controller.add(connection);
-      }
-      return;
-    }
-
-    final currentSSID = await Wifi.getCurrentWifiSSID();
-    if (currentSSID == null) {
-      const connection = WifiConnection(state: WifiConnectionState.unknown);
-
-      if (_lastWifiConnection.state != connection.state) {
-        _lastWifiConnection = connection;
-        controller.add(connection);
-      }
-      return;
-    }
-
-    if (currentSSID == _unknownSSID) {
-      const connection = WifiConnection(state: WifiConnectionState.connecting);
-
-      if (_lastWifiConnection.state != connection.state) {
-        _lastWifiConnection = connection;
-        controller.add(connection);
-      }
-      return;
-    }
-
-    final connection = WifiConnection(
-      state: WifiConnectionState.connected,
-      ssid: currentSSID,
-    );
-
-    if (_lastWifiConnection.state != connection.state ||
-        _lastWifiConnection.ssid != connection.ssid) {
-      _lastWifiConnection = connection;
-      controller.add(connection);
-      return;
+    if (!_stateStreamController.isClosed) {
+      _stateStreamController.close();
     }
   }
 
@@ -211,7 +179,7 @@ class Wifi {
   }
 }
 
-enum WifiConnectionState {
+enum WifiNetworkState {
   unauthorized,
   connected,
   disconnected,
@@ -221,14 +189,14 @@ enum WifiConnectionState {
   off,
 }
 
-class WifiConnection {
-  final WifiConnectionState state;
+class WifiNetwork {
+  final WifiNetworkState state;
   final String? ssid;
 
-  const WifiConnection({required this.state, this.ssid});
+  const WifiNetwork({required this.state, this.ssid});
 
   @override
   String toString() {
-    return 'WifiConnection: state - ${state.name} | ssid - $ssid';
+    return 'WifiNetwork: state - ${state.name} | ssid - $ssid';
   }
 }

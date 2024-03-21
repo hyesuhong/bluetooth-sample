@@ -24,18 +24,17 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   bool _wifiEnabled = false;
   bool _hasPassword = false;
   String _password = '';
-  WifiConnection _connectionState = const WifiConnection(
-    state: WifiConnectionState.unknown,
+  WifiNetwork _currentNetwork = const WifiNetwork(
+    state: WifiNetworkState.unknown,
   );
   bool _is2_4GHz = false;
 
   FocusNode focusInputNode = FocusNode();
 
-  late StreamSubscription<bool> _wifiEnabledStateSubscription;
-  StreamSubscription<WifiConnection>? _wifiConnectionSubscription;
+  late StreamSubscription<WifiNetwork> _currentNetworkSubscription;
 
   bool get _canUsePassword =>
-      _connectionState.state == WifiConnectionState.connected && _is2_4GHz;
+      _currentNetwork.state == WifiNetworkState.connected && _is2_4GHz;
 
   bool get _canPush =>
       _canUsePassword &&
@@ -45,29 +44,18 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   void initState() {
     super.initState();
 
-    _wifiEnabledStateSubscription = Wifi.enabledState.listen((state) {
+    _currentNetworkSubscription = Wifi.currentNetwork.listen((network) {
       if (mounted) {
         setState(() {
-          _wifiEnabled = state;
-          _connectionState = WifiConnection(
-            state: state ? WifiConnectionState.on : WifiConnectionState.off,
-          );
+          _wifiEnabled = network.state != WifiNetworkState.off;
+          _currentNetwork = network;
         });
       }
 
-      if (state) {
-        if (_wifiConnectionSubscription == null ||
-            !_wifiConnectionSubscription!.isPaused) {
-          _wifiConnectionSubscription ??=
-              Wifi.connectionState.listen(_checkCurrentWifi);
-          return;
-        }
-
-        _wifiConnectionSubscription?.resume();
+      if (network.state != WifiNetworkState.off) {
+        _checkCurrentWifi(network);
         return;
       }
-
-      _wifiConnectionSubscription?.pause();
 
       _resetWifiInfo();
     }, onError: (error) {
@@ -75,14 +63,15 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
         status: SnackBarStatus.error,
         message: error.toString(),
       );
+    }, onDone: () {
+      print('done! wifiScreen');
     });
   }
 
   @override
   void dispose() {
     focusInputNode.dispose();
-    _wifiEnabledStateSubscription.cancel();
-    _wifiConnectionSubscription?.cancel();
+    _currentNetworkSubscription.cancel();
 
     super.dispose();
   }
@@ -102,23 +91,15 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
     return is2_4GHz;
   }
 
-  _checkCurrentWifi(WifiConnection state) async {
+  _checkCurrentWifi(WifiNetwork network) async {
     bool is2_4GHz = false;
 
-    setState(() {
-      _connectionState = state;
-    });
-
-    if (state.state != WifiConnectionState.connected) {
+    if (network.state != WifiNetworkState.connected) {
       _resetWifiInfo();
       return;
     }
 
     is2_4GHz = await _checkWifiFrequency();
-
-    if (is2_4GHz) {
-      _wifiConnectionSubscription?.pause();
-    }
 
     setState(() {
       _is2_4GHz = is2_4GHz;
@@ -167,13 +148,13 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
   }
 
   Future _onPushPressed() async {
-    if (_connectionState.state != WifiConnectionState.connected) {
+    if (_currentNetwork.state != WifiNetworkState.connected) {
       return;
     }
 
     MaterialPageRoute route = MaterialPageRoute(
       builder: (context) => WifiConnectionScreen(
-        ssid: _connectionState.ssid!,
+        ssid: _currentNetwork.ssid!,
         password: _password,
         characteristic: widget.characteristic,
       ),
@@ -201,9 +182,9 @@ class _WifiInfoScreenState extends State<WifiInfoScreen> {
                 width: double.infinity,
                 child: WifiInfoWidget(
                   enabled: _wifiEnabled,
-                  state: _connectionState,
+                  network: _currentNetwork,
                   warningText:
-                      _connectionState.state == WifiConnectionState.connected &&
+                      _currentNetwork.state == WifiNetworkState.connected &&
                               !_is2_4GHz
                           ? AppL10n.getL10n(context).not2_4GHz
                           : null,
